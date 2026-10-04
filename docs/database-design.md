@@ -137,7 +137,7 @@ Every intervention belongs to one learner. An intervention may optionally target
 - Topic names should be unique.
 - Duplicate results for the same learner, assessment and topic must be prevented.
 - Intervention status should use a controlled set of accepted values.
-- A completed intervention may have a completion date.
+- A completed intervention must have a completion date, while planned or active interventions must not have one.
 - Percentages should be calculated from the stored score values.
 
 ## Assumptions requiring validation
