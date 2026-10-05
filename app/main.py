@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 
+from app.routers.assessment_results import (
+    router as assessment_results_router,
+)
 from app.routers.assessments import router as assessments_router
 from app.routers.learners import router as learners_router
 from app.routers.topics import router as topics_router
@@ -14,6 +17,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.include_router(assessment_results_router)
 app.include_router(assessments_router)
 app.include_router(learners_router)
 app.include_router(topics_router)

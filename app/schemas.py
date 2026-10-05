@@ -146,6 +146,18 @@ class AssessmentResultUpdate(BaseModel):
 
     @model_validator(mode="after")
     def check_supplied_scores(self) -> Self:
+        if not self.model_fields_set:
+            raise ValueError("at least one field must be provided")
+
+        if "score" in self.model_fields_set and self.score is None:
+            raise ValueError("score must not be null")
+
+        if (
+            "maximum_score" in self.model_fields_set
+            and self.maximum_score is None
+        ):
+            raise ValueError("maximum_score must not be null")
+
         if (
             self.score is not None
             and self.maximum_score is not None
