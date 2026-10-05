@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.routers.learners import router as learners_router
+from app.routers.topics import router as topics_router
 
 
 app = FastAPI(
@@ -13,6 +14,7 @@ app = FastAPI(
 )
 
 app.include_router(learners_router)
+app.include_router(topics_router)
 
 
 @app.get("/health", tags=["Health"])

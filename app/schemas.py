@@ -90,6 +90,15 @@ class TopicUpdate(BaseModel):
     name: TopicName | None = None
     description: str | None = None
 
+    @model_validator(mode="after")
+    def check_update_contains_a_value(self) -> Self:
+        if not self.model_fields_set:
+            raise ValueError("at least one field must be provided")
+
+        if "name" in self.model_fields_set and self.name is None:
+            raise ValueError("name must not be null")
+
+        return self
 
 class TopicRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
