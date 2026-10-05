@@ -71,6 +71,22 @@ class AssessmentUpdate(BaseModel):
     title: AssessmentTitle | None = None
     assessment_date: date | None = None
 
+    @model_validator(mode="after")
+    def check_update_contains_valid_values(self) -> Self:
+        if not self.model_fields_set:
+            raise ValueError("at least one field must be provided")
+
+        if "title" in self.model_fields_set and self.title is None:
+            raise ValueError("title must not be null")
+
+        if (
+            "assessment_date" in self.model_fields_set
+            and self.assessment_date is None
+        ):
+            raise ValueError("assessment_date must not be null")
+
+        return self
+
 
 class AssessmentRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
