@@ -208,6 +208,19 @@ class InterventionUpdate(BaseModel):
     status: InterventionStatus | None = None
     completed_at: datetime | None = None
 
+    @model_validator(mode="after")
+    def check_update_contains_valid_values(self) -> Self:
+        if not self.model_fields_set:
+            raise ValueError("at least one field must be provided")
+
+        if "summary" in self.model_fields_set and self.summary is None:
+            raise ValueError("summary must not be null")
+
+        if "status" in self.model_fields_set and self.status is None:
+            raise ValueError("status must not be null")
+
+        return self
+
 
 class InterventionRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
