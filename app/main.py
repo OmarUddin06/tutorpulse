@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from app.routers.learners import router as learners_router
+
 
 app = FastAPI(
     title="TutorPulse API",
@@ -9,6 +11,8 @@ app = FastAPI(
     ),
     version="0.1.0",
 )
+
+app.include_router(learners_router)
 
 
 @app.get("/health", tags=["Health"])

@@ -51,7 +51,7 @@ class LearnerCreate(BaseModel):
 
 
 class LearnerUpdate(BaseModel):
-    display_name: DisplayName | None = None
+    display_name: DisplayName
 
 
 class LearnerRead(BaseModel):
