@@ -226,3 +226,4 @@ __marimo__/
 
 # Generated TutorPulse analysis data
 data/generated/*
+data/prepared/*
