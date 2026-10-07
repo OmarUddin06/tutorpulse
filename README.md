@@ -2,11 +2,13 @@
 
 TutorPulse is a learning-outcomes and intervention service for tutors.
 
-It provides a REST API for recording anonymised assessment results, monitoring topic-level performance and documenting support interventions. The project uses synthetic demonstration data and must not contain identifiable pupil information.
+It provides a REST API for recording anonymised assessment results, monitoring topic-level performance and documenting support interventions. It also contains a reproducible data-analysis pipeline for preparing fictional learner outcomes for leakage-safe predictive modelling.
+
+The project uses synthetic demonstration data and must not contain identifiable pupil information.
 
 ## Current functionality
 
-The API currently supports:
+The API and analysis pipeline currently support:
 
 - Creating, viewing, updating and deleting anonymised learners
 - Creating, viewing, updating and deleting curriculum topics
@@ -21,6 +23,12 @@ The API currently supports:
 - Real API integration tests using PostgreSQL
 - Docker Compose support for running FastAPI and PostgreSQL together
 - Continuous integration through GitHub Actions
+- Reproducible generation of fictional analysis data
+- Automated validation of generated relational data
+- Leakage-safe historical feature engineering
+- Chronological training, validation and test splits
+- Reproducible exploratory analysis using Jupyter
+- Automated tests proving that same-day and future information is excluded
 
 ## Technology
 
@@ -32,6 +40,13 @@ The API currently supports:
 - Pydantic Settings
 - Psycopg
 - pytest
+- HTTPX2
+- NumPy
+- pandas
+- Matplotlib
+- seaborn
+- scikit-learn
+- JupyterLab
 - Docker
 - Docker Compose
 - GitHub Actions
@@ -40,7 +55,46 @@ The API currently supports:
 
 Only fictional, synthetic or fully anonymised learner data may be used.
 
-Do not add real pupil names, contact details, school identifiers or other personal information to the database, source code, tests, screenshots or repository history.
+Do not add real pupil names, contact details, school identifiers or other personal information to the database, source code, tests, screenshots, notebooks or repository history.
+
+The data-analysis generator creates fictional learner names such as `Synthetic Learner 001`. The generated patterns are demonstration assumptions and must not be presented as evidence about real learners.
+
+## Modelling question
+
+TutorPulse's working modelling question is:
+
+> Using only a learner's assessment history and intervention information available before a future assessment, can TutorPulse predict whether their next topic result will fall below the agreed support threshold?
+
+A result is currently labelled as needing support when its percentage is below 60%.
+
+The 60% threshold is a transparent and configurable project assumption. It is not presented as a universal educational standard.
+
+Model training is intentionally excluded from the current stage. The prepared data will be used for baseline and tree-based modelling during the next TutorPulse stage.
+
+## Leakage controls
+
+The prediction point is immediately before the target assessment.
+
+Only information from an earlier calendar date may become a predictive feature:
+
+- Earlier assessment results are permitted
+- Earlier interventions are permitted
+- Same-day assessment results are excluded
+- Future assessment results are excluded
+- Same-day and future interventions are excluded
+- An intervention only counts as completed if completion occurred before the target date
+- Target scores, target percentages and target labels are excluded from feature columns
+- Learner names and database identifiers are excluded from predictive features
+
+The modelling dataset is divided using complete assessment dates:
+
+1. The earliest assessment dates form the training set
+2. Later assessment dates form the validation set
+3. The most recent assessment dates form the test set
+
+A random row-level split is not used because it could mix past and future information from the same learners.
+
+Detailed assumptions and limitations are documented in `docs/modelling-scope.md`.
 
 ## Project structure
 
@@ -49,6 +103,12 @@ tutorpulse/
 ├── .github/
 │   └── workflows/
 │       └── repository-check.yml
+├── analysis/
+│   ├── notebooks/
+│   │   └── 01_exploratory_analysis.ipynb
+│   ├── __init__.py
+│   ├── modelling_dataset.py
+│   └── synthetic_data.py
 ├── app/
 │   ├── routers/
 │   │   ├── __init__.py
@@ -69,7 +129,12 @@ tutorpulse/
 │   ├── queries.sql
 │   ├── README.md
 │   └── seed.sql
+├── docs/
+│   └── modelling-scope.md
 ├── tests/
+│   ├── analysis/
+│   │   ├── test_modelling_dataset.py
+│   │   └── test_synthetic_data.py
 │   ├── integration/
 │   │   ├── conftest.py
 │   │   ├── test_api_database.py
@@ -92,9 +157,12 @@ tutorpulse/
 ├── compose.yaml
 ├── Dockerfile
 ├── pytest.ini
+├── requirements-analysis.txt
 ├── requirements.txt
 └── README.md
 ```
+
+Generated files are written under `data/generated` and `data/prepared`. These directories are ignored by Git because their contents can be reproduced from the committed source code.
 
 ## API resources
 
@@ -140,13 +208,25 @@ The PowerShell prompt should begin with `(.venv)`.
 
 ### 3. Install the Python dependencies
 
+Upgrade `pip`:
+
 ```powershell
 python -m pip install --upgrade pip
 ```
 
+For API and database development only:
+
 ```powershell
 python -m pip install -r requirements.txt
 ```
+
+For API, database and data-analysis development:
+
+```powershell
+python -m pip install -r requirements-analysis.txt
+```
+
+The analysis requirements include the main project requirements through `-r requirements.txt`.
 
 The main dependencies include:
 
@@ -156,6 +236,17 @@ The main dependencies include:
 - Pydantic and Pydantic Settings for validation and configuration
 - pytest for automated testing
 - HTTPX2 for FastAPI test clients
+- NumPy for reproducible numerical generation
+- pandas for relational data preparation and analysis
+- Matplotlib and seaborn for visualisation
+- scikit-learn for later modelling work
+- JupyterLab and IPykernel for reproducible notebooks
+
+Confirm that the installed packages are compatible:
+
+```powershell
+python -m pip check
+```
 
 ### 4. Create the local PostgreSQL database
 
@@ -223,7 +314,165 @@ The OpenAPI specification is available at:
 http://127.0.0.1:8000/openapi.json
 ```
 
-Stop the development server by pressing `Ctrl + C`.
+The health check is available at:
+
+```text
+http://127.0.0.1:8000/health
+```
+
+Stop the development server by pressing `Ctrl+C`.
+
+## Generate the synthetic analysis data
+
+Install the analysis dependencies first:
+
+```powershell
+python -m pip install -r requirements-analysis.txt
+```
+
+Generate the default fictional relational dataset:
+
+```powershell
+python -m analysis.synthetic_data
+```
+
+The default configuration creates:
+
+- 120 fictional learners
+- 4 fictional topics
+- 24 fortnightly assessments
+- 10,536 topic-level assessment results
+- 1,075 fictional interventions
+
+The exact row counts are reproducible because the default generator uses a fixed random seed.
+
+Generated relational CSV files and a manifest are written to:
+
+```text
+data/generated/
+```
+
+The generated files mirror the five PostgreSQL tables:
+
+- `learners`
+- `topics`
+- `assessments`
+- `assessment_results`
+- `interventions`
+
+Display the command-line options:
+
+```powershell
+python -m analysis.synthetic_data --help
+```
+
+Example custom generation:
+
+```powershell
+python -m analysis.synthetic_data --seed 123 --learners 150 --assessments 30
+```
+
+The generator does not modify the development PostgreSQL database.
+
+## Build the leakage-safe modelling dataset
+
+After generating the relational data, run:
+
+```powershell
+python -m analysis.modelling_dataset
+```
+
+The preparation process:
+
+- Joins assessments, topics, assessment results and interventions
+- Calculates the target result percentage
+- Labels results below 60% as needing support
+- Calculates historical features separately for each target row
+- Uses only records dated before the target assessment
+- Excludes same-day and future records
+- Excludes initial results that have no earlier history
+- Creates chronological training, validation and test splits
+- Writes a manifest containing the feature list and split boundaries
+
+Prepared files are written to:
+
+```text
+data/prepared/
+```
+
+The prepared files are:
+
+- `modelling_dataset.csv`
+- `train.csv`
+- `validation.csv`
+- `test.csv`
+- `manifest.json`
+
+The default generated dataset produces:
+
+| Dataset | Rows | Date range | Support rate |
+|---|---:|---|---:|
+| Training | 5,668 | 2025-01-29 to 2025-07-16 | 37.2% |
+| Validation | 2,168 | 2025-07-30 to 2025-09-24 | 30.0% |
+| Test | 2,220 | 2025-10-08 to 2025-12-03 | 26.5% |
+| Complete modelling dataset | 10,056 | 2025-01-29 to 2025-12-03 | Changes over time |
+
+The declining support rate is an intentional synthetic pattern caused by fictional learner growth. It provides a distribution-shift challenge for later model evaluation.
+
+Display the preparation options:
+
+```powershell
+python -m analysis.modelling_dataset --help
+```
+
+Example using a different support threshold:
+
+```powershell
+python -m analysis.modelling_dataset --support-threshold 55
+```
+
+The selected threshold is recorded in the prepared-data manifest.
+
+## Exploratory analysis
+
+Start JupyterLab:
+
+```powershell
+python -m jupyter lab
+```
+
+Open:
+
+```text
+analysis/notebooks/01_exploratory_analysis.ipynb
+```
+
+The notebook covers:
+
+- Dataset shape
+- Assessment-date coverage
+- Missing-value checks
+- Duplicate checks
+- Result distributions
+- Target balance
+- Topic-level support rates
+- Chronological split comparisons
+- Support-rate changes over time
+- Previous same-topic performance
+- Selected numeric correlations
+- Synthetic-data limitations
+
+The notebook performs no model training or model selection.
+
+Stop JupyterLab with `Ctrl+C`.
+
+Re-execute the complete notebook non-interactively:
+
+```powershell
+python -m jupyter nbconvert --to notebook --execute --inplace analysis/notebooks/01_exploratory_analysis.ipynb --ExecutePreprocessor.timeout=120
+```
+
+Successful non-interactive execution confirms that the notebook does not depend on cells being run manually in an accidental order.
 
 ## Run with Docker Compose
 
@@ -283,7 +532,7 @@ Invoke-RestMethod http://127.0.0.1:8000/health
 docker compose --env-file .env.docker logs
 ```
 
-Follow new log messages until `Ctrl + C` is pressed:
+Follow new log messages until `Ctrl+C` is pressed:
 
 ```powershell
 docker compose --env-file .env.docker logs --follow
@@ -307,26 +556,27 @@ The `--volumes` option permanently removes only the database volume belonging to
 
 ## Automated testing
 
-TutorPulse contains two complementary categories of automated tests:
+TutorPulse contains three complementary categories of automated tests:
 
-- Unit and isolated API tests that run without connecting to PostgreSQL
-- Integration tests that use a real PostgreSQL test database
+- Unit and isolated API tests
+- Analysis and leakage-safety tests
+- Integration tests using a real PostgreSQL test database
 
-### Isolated tests
+### Non-integration tests
 
-Run only the tests that do not require PostgreSQL:
+Run all tests that do not require PostgreSQL:
 
 ```powershell
-python -m pytest -m "not integration" -v
+python -m pytest tests --ignore=tests/integration -v
 ```
 
 Expected result:
 
 ```text
-57 passed
+73 passed
 ```
 
-These tests cover:
+The API and schema tests cover:
 
 - API health
 - Request validation
@@ -336,6 +586,25 @@ These tests cover:
 - Duplicate values
 - Score validation
 - Intervention state rules
+
+The 16 analysis tests cover:
+
+- Reproducible synthetic generation
+- Expected relational tables
+- Valid learner and topic values
+- Relational and score constraints
+- Unique learner-assessment-topic combinations
+- Valid intervention states
+- Presence of both target classes
+- Sufficient chronological periods
+- Accurate output manifests
+- Correct historical aggregates
+- Exclusion of same-day assessment results
+- Exclusion of future information
+- Intervention creation and completion cutoffs
+- Prohibited feature checks
+- Complete non-overlapping chronological splits
+- Configurable support thresholds
 
 ### PostgreSQL integration-test setup
 
@@ -383,6 +652,8 @@ Apply the migration:
 docker exec tutorpulse-test-db psql -U postgres -d tutorpulse_test -v ON_ERROR_STOP=1 -f /tmp/001_create_initial_schema.sql
 ```
 
+If the tables already exist in the persistent test volume, do not apply the migration again.
+
 ### Integration tests
 
 Run only the PostgreSQL integration tests:
@@ -414,6 +685,12 @@ Some integration tests deliberately attempt invalid database operations. Postgre
 
 ### Complete test suite
 
+Ensure the test database container is running:
+
+```powershell
+docker start tutorpulse-test-db
+```
+
 Run every test:
 
 ```powershell
@@ -423,7 +700,7 @@ python -m pytest -v
 Expected result:
 
 ```text
-75 passed
+91 passed
 ```
 
 Stop the test database when it is no longer needed:
@@ -444,15 +721,18 @@ The GitHub Actions repository check runs automatically for every push and pull r
 
 The workflow:
 
-1. Checks out the repository.
-2. Starts a PostgreSQL 18.6 service.
-3. Sets up Python 3.14.
-4. Installs the project dependencies.
-5. Applies the database migration.
-6. Compiles the application and test files.
-7. Runs all 75 automated tests.
-8. Validates the Docker Compose configuration.
-9. Builds the TutorPulse Docker image.
+1. Checks out the repository
+2. Starts a PostgreSQL 18.6 service
+3. Sets up Python 3.14
+4. Installs the API and analysis dependencies
+5. Applies the database migration
+6. Compiles the application, analysis and test files
+7. Regenerates the fictional relational dataset
+8. Rebuilds the leakage-safe modelling dataset
+9. Executes the exploratory-analysis notebook
+10. Runs all 91 automated tests
+11. Validates the Docker Compose configuration
+12. Builds the TutorPulse Docker image
 
 A pull request should only be merged after the repository check completes successfully.
 
@@ -472,6 +752,48 @@ The database includes:
 - Synthetic seed data
 - Twelve reporting queries
 
+## Analysis documentation
+
+The Stage 5 modelling contract is available in `docs/modelling-scope.md`.
+
+It explains:
+
+- The modelling question
+- The prediction unit
+- The prediction point
+- The support-threshold target
+- Information permitted as features
+- Information prohibited as features
+- The chronological splitting strategy
+- The current seed-data limitations
+- Synthetic-data requirements
+- Database constraints
+- Ethical and practical limitations
+- The boundary between Stage 5 and later modelling work
+
+## Responsible-use limitations
+
+TutorPulse is a portfolio and learning project, not a production educational decision system.
+
+The current analysis uses fictional data. It cannot demonstrate real-world predictive accuracy, fairness or educational benefit.
+
+A real deployment would require:
+
+- An appropriate lawful basis for processing educational data
+- Security and access controls
+- Representative evaluation data
+- Fairness assessment
+- Monitoring for changing data distributions
+- Human review of predictions
+- Clear communication of uncertainty
+- Procedures for correcting inaccurate information
+- Appeal and review processes
+- Safeguards against punitive or automatic decisions
+
+Predictions should support tutor judgement rather than replace it.
+
+False negatives are particularly important because they represent learners who may need support but are not identified. False positives also matter because unnecessary interventions may consume tutor time and affect learner trust.
+
 ## Initial user stories
 
 ### Record an anonymised learner
@@ -480,22 +802,25 @@ As a tutor, I want to create an anonymised learner record so that I can monitor 
 
 ### Record an assessment result
 
-As a tutor, I want to record an assessment result against an assessment and topic so that I can track a learner’s performance over time.
+As a tutor, I want to record an assessment result against an assessment and topic so that I can track a learner's performance over time.
 
 ### Review topic-level progress
 
-As a tutor, I want to view a learner’s results by topic so that I can identify areas where additional support may be beneficial.
+As a tutor, I want to view a learner's results by topic so that I can identify areas where additional support may be beneficial.
 
 ## Planned development
 
-Future stages of TutorPulse include:
+Future TutorPulse stages include:
 
-- Exploratory data analysis
-- An interpretable learner-intervention model
-- Model evaluation and documentation
-- A prediction endpoint
-- Application logging
-- Production limitations and responsible-use documentation
+- Training an interpretable baseline classification model
+- Training and comparing tree-based models
+- Evaluating precision, recall, F1, ROC-AUC and PR-AUC
+- Selecting decision thresholds based on the support use case
+- Documenting model behaviour and limitations
+- Adding governed inference to the FastAPI application
+- Adding application and prediction logging
+- Monitoring changing input distributions
+- Publishing a documented release
 - Public deployment
 
 ## Author
