@@ -1,0 +1,52 @@
+name: tutorpulse
+
+services:
+  database:
+    image: postgres:18.6
+    environment:
+      POSTGRES_DB: tutorpulse
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${TUTORPULSE_DOCKER_DB_PASSWORD:?Set TUTORPULSE_DOCKER_DB_PASSWORD in .env.docker}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - tutorpulse-data:/var/lib/postgresql
+      - ./database/migrations/001_create_initial_schema.sql:/docker-entrypoint-initdb.d/001_create_initial_schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres -d tutorpulse
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      TUTORPULSE_DB_HOST: database
+      TUTORPULSE_DB_PORT: 5432
+      TUTORPULSE_DB_NAME: tutorpulse
+      TUTORPULSE_DB_USER: postgres
+      TUTORPULSE_DB_PASSWORD: ${TUTORPULSE_DOCKER_DB_PASSWORD:?Set TUTORPULSE_DOCKER_DB_PASSWORD in .env.docker}
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://localhost:8000/health')
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  tutorpulse-data:
