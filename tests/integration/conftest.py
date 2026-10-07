@@ -1,10 +1,14 @@
 from collections.abc import Generator
 
 import pytest
+from fastapi.testclient import TestClient
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import URL, create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.main import app
 
 
 class IntegrationTestSettings(BaseSettings):
@@ -108,3 +112,20 @@ def db_session(
         session.close()
         outer_transaction.rollback()
         connection.close()
+
+@pytest.fixture
+def api_client(
+    db_session: Session,
+) -> Generator[TestClient, None, None]:
+    """Run FastAPI using the real integration-test database session."""
+
+    def override_get_db() -> Generator[Session, None, None]:
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        app.dependency_overrides.clear()
