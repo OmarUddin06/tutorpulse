@@ -10,4 +10,7 @@ __pycache__
 tests
 database
 docs
+data/generated
+data/prepared
+artifacts/models
 *.md

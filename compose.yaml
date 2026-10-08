@@ -32,6 +32,7 @@ services:
       TUTORPULSE_DB_NAME: tutorpulse
       TUTORPULSE_DB_USER: postgres
       TUTORPULSE_DB_PASSWORD: ${TUTORPULSE_DOCKER_DB_PASSWORD:?Set TUTORPULSE_DOCKER_DB_PASSWORD in .env.docker}
+      TUTORPULSE_MODEL_ARTIFACT_DIRECTORY: /app/artifacts/models
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:
@@ -42,11 +43,11 @@ services:
         - CMD
         - python
         - -c
-        - import urllib.request; urllib.request.urlopen('http://localhost:8000/health')
+        - import urllib.request; urllib.request.urlopen('http://localhost:8000/model/health')
       interval: 10s
       timeout: 3s
       retries: 5
-      start_period: 10s
+      start_period: 15s
 
 volumes:
   tutorpulse-data:

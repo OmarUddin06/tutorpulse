@@ -1,0 +1,7 @@
+# Dependencies required to build and serve TutorPulse model artifacts.
+-r requirements.txt
+
+numpy==2.5.3
+pandas==3.0.6
+scikit-learn==1.9.1
+joblib==1.6.0
