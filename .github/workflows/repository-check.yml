@@ -53,6 +53,7 @@ jobs:
           cache: pip
           cache-dependency-path: |
             requirements.txt
+            requirements-model.txt
             requirements-analysis.txt
 
       - name: Check required documentation exists
@@ -60,6 +61,9 @@ jobs:
           test -f README.md
           test -f docs/modelling-scope.md
           test -f docs/model-evaluation.md
+          test -f docs/inference-contract.md
+          test -f docs/model-card.md
+          test -f docs/model-monitoring.md
 
       - name: Install Python dependencies
         run: |
@@ -123,5 +127,87 @@ jobs:
       - name: Validate Docker Compose configuration
         run: docker compose config --quiet
 
-      - name: Build FastAPI Docker image
-        run: docker build --tag tutorpulse-api:ci .
+      - name: Build containerised inference service
+        run: docker compose build api
+
+      - name: Start containerised inference service
+        run: |
+          docker compose up \
+            --detach \
+            --wait \
+            --wait-timeout 180
+
+      - name: Verify containerised model inference
+        run: |
+          python - <<'PY'
+          import json
+          from urllib.request import Request, urlopen
+
+          with urlopen(
+              "http://127.0.0.1:8000/model/health",
+              timeout=10,
+          ) as response:
+              health = json.load(response)
+
+          assert response.status == 200
+          assert health == {
+              "status": "ready",
+              "model_name": "logistic_regression",
+              "artifact_schema_version": 1,
+              "decision_threshold": 0.38,
+          }
+
+          payload = {
+              "topic_name": "Algebra",
+              "maximum_score": 20.0,
+              "prior_assessment_count": 5,
+              "prior_result_count": 18,
+              "prior_average_percentage": 64.2,
+              "prior_minimum_percentage": 42.0,
+              "prior_maximum_percentage": 88.0,
+              "prior_support_count": 6,
+              "prior_support_rate": 0.3333,
+              "previous_assessment_average_percentage": 61.5,
+              "days_since_previous_assessment": 14,
+              "prior_same_topic_count": 4,
+              "prior_same_topic_average_percentage": 58.5,
+              "prior_same_topic_latest_percentage": 62.0,
+              "prior_same_topic_support_count": 2,
+              "prior_intervention_count": 3,
+              "prior_same_topic_intervention_count": 1,
+              "prior_completed_intervention_count": 2,
+          }
+
+          request = Request(
+              "http://127.0.0.1:8000/predictions/support-risk",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+
+          with urlopen(request, timeout=10) as response:
+              prediction = json.load(response)
+
+          assert response.status == 200
+          assert 0.0 <= prediction["support_probability"] <= 1.0
+          assert isinstance(
+              prediction["predicted_needs_support"],
+              bool,
+          )
+          assert prediction["decision_threshold"] == 0.38
+          assert prediction["support_threshold"] == 60.0
+          assert prediction["model_name"] == "logistic_regression"
+          assert prediction["artifact_schema_version"] == 1
+          assert prediction["human_review_required"] is True
+
+          print("Model health:", health)
+          print("Prediction:", prediction)
+          PY
+
+      - name: Show container logs after failure
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop containerised services
+        if: always()
+        run: docker compose down --volumes
