@@ -2,13 +2,13 @@
 
 TutorPulse is a learning-outcomes and intervention service for tutors.
 
-It provides a REST API for recording anonymised assessment results, monitoring topic-level performance and documenting support interventions. It also contains a reproducible data-analysis pipeline for preparing fictional learner outcomes for leakage-safe predictive modelling.
+It provides a REST API for recording anonymised assessment results, monitoring topic-level performance and documenting support interventions. It also contains a reproducible data-analysis and machine-learning pipeline for preparing fictional learner outcomes, training classification models and evaluating learner-support risk predictions.
 
 The project uses synthetic demonstration data and must not contain identifiable pupil information.
 
 ## Current functionality
 
-The API and analysis pipeline currently support:
+The API, analysis and modelling pipeline currently support:
 
 - Creating, viewing, updating and deleting anonymised learners
 - Creating, viewing, updating and deleting curriculum topics
@@ -29,6 +29,16 @@ The API and analysis pipeline currently support:
 - Chronological training, validation and test splits
 - Reproducible exploratory analysis using Jupyter
 - Automated tests proving that same-day and future information is excluded
+- Validation of the prepared modelling-data contract
+- A majority-class dummy baseline
+- An interpretable logistic-regression classifier
+- A random-forest comparison model
+- Recall-focused decision-threshold selection
+- Validation and final chronological test evaluation
+- Probability-quality and calibration assessment
+- Topic and history-depth error analysis
+- Logistic-regression coefficient interpretation
+- Reproducible saving and reloading of the selected modelling pipeline
 
 ## Technology
 
@@ -46,6 +56,7 @@ The API and analysis pipeline currently support:
 - Matplotlib
 - seaborn
 - scikit-learn
+- joblib
 - JupyterLab
 - Docker
 - Docker Compose
@@ -55,21 +66,31 @@ The API and analysis pipeline currently support:
 
 Only fictional, synthetic or fully anonymised learner data may be used.
 
-Do not add real pupil names, contact details, school identifiers or other personal information to the database, source code, tests, screenshots, notebooks or repository history.
+Do not add real pupil names, contact details, school identifiers or other personal information to the database, source code, tests, screenshots, notebooks, model artifacts or repository history.
 
 The data-analysis generator creates fictional learner names such as `Synthetic Learner 001`. The generated patterns are demonstration assumptions and must not be presented as evidence about real learners.
 
 ## Modelling question
 
-TutorPulse's working modelling question is:
+TutorPulse's modelling question is:
 
 > Using only a learner's assessment history and intervention information available before a future assessment, can TutorPulse predict whether their next topic result will fall below the agreed support threshold?
 
-A result is currently labelled as needing support when its percentage is below 60%.
+A result is labelled as needing support when its percentage is below 60%.
 
 The 60% threshold is a transparent and configurable project assumption. It is not presented as a universal educational standard.
 
-Model training is intentionally excluded from the current stage. The prepared data will be used for baseline and tree-based modelling during the next TutorPulse stage.
+The current modelling pipeline trains and compares:
+
+- A majority-class dummy baseline
+- Logistic regression
+- Random forest
+
+Logistic regression is retained as the selected model because it provides competitive validation performance, relatively strong probability quality, reproducibility and clearer interpretation than the tree-based alternative.
+
+The selected probability threshold is 0.38. It prioritises identifying more below-threshold results while requiring validation precision of approximately 60%.
+
+Complete results and limitations are documented in `docs/model-evaluation.md`.
 
 ## Leakage controls
 
@@ -94,7 +115,9 @@ The modelling dataset is divided using complete assessment dates:
 
 A random row-level split is not used because it could mix past and future information from the same learners.
 
-Detailed assumptions and limitations are documented in `docs/modelling-scope.md`.
+Detailed modelling assumptions are documented in `docs/modelling-scope.md`.
+
+Model results, model-selection decisions and limitations are documented in `docs/model-evaluation.md`.
 
 ## Project structure
 
@@ -107,8 +130,17 @@ tutorpulse/
 │   ├── notebooks/
 │   │   └── 01_exploratory_analysis.ipynb
 │   ├── __init__.py
+│   ├── error_analysis.py
+│   ├── final_evaluation.py
+│   ├── model_artifact.py
+│   ├── model_comparison.py
+│   ├── model_data.py
+│   ├── model_interpretation.py
+│   ├── model_training.py
+│   ├── modelling.py
 │   ├── modelling_dataset.py
-│   └── synthetic_data.py
+│   ├── synthetic_data.py
+│   └── threshold_selection.py
 ├── app/
 │   ├── routers/
 │   │   ├── __init__.py
@@ -130,11 +162,20 @@ tutorpulse/
 │   ├── README.md
 │   └── seed.sql
 ├── docs/
+│   ├── model-evaluation.md
 │   └── modelling-scope.md
 ├── tests/
 │   ├── analysis/
+│   │   ├── test_error_analysis.py
+│   │   ├── test_final_evaluation.py
+│   │   ├── test_model_artifact.py
+│   │   ├── test_model_comparison.py
+│   │   ├── test_model_data.py
+│   │   ├── test_model_interpretation.py
+│   │   ├── test_model_training.py
 │   │   ├── test_modelling_dataset.py
-│   │   └── test_synthetic_data.py
+│   │   ├── test_synthetic_data.py
+│   │   └── test_threshold_selection.py
 │   ├── integration/
 │   │   ├── conftest.py
 │   │   ├── test_api_database.py
@@ -162,7 +203,20 @@ tutorpulse/
 └── README.md
 ```
 
-Generated files are written under `data/generated` and `data/prepared`. These directories are ignored by Git because their contents can be reproduced from the committed source code.
+Generated datasets are written under:
+
+```text
+data/generated/
+data/prepared/
+```
+
+Generated model artifacts are written under:
+
+```text
+artifacts/models/
+```
+
+These locations are ignored by Git because their contents can be reproduced from the committed source code.
 
 ## API resources
 
@@ -220,7 +274,7 @@ For API and database development only:
 python -m pip install -r requirements.txt
 ```
 
-For API, database and data-analysis development:
+For API, database, analysis and modelling development:
 
 ```powershell
 python -m pip install -r requirements-analysis.txt
@@ -239,7 +293,8 @@ The main dependencies include:
 - NumPy for reproducible numerical generation
 - pandas for relational data preparation and analysis
 - Matplotlib and seaborn for visualisation
-- scikit-learn for later modelling work
+- scikit-learn for preprocessing, training and evaluation
+- joblib for serialising the selected model pipeline
 - JupyterLab and IPykernel for reproducible notebooks
 
 Confirm that the installed packages are compatible:
@@ -417,7 +472,7 @@ The default generated dataset produces:
 | Test | 2,220 | 2025-10-08 to 2025-12-03 | 26.5% |
 | Complete modelling dataset | 10,056 | 2025-01-29 to 2025-12-03 | Changes over time |
 
-The declining support rate is an intentional synthetic pattern caused by fictional learner growth. It provides a distribution-shift challenge for later model evaluation.
+The declining support rate is an intentional synthetic pattern caused by fictional learner growth. It provides a distribution-shift challenge for model evaluation.
 
 Display the preparation options:
 
@@ -431,7 +486,7 @@ Example using a different support threshold:
 python -m analysis.modelling_dataset --support-threshold 55
 ```
 
-The selected threshold is recorded in the prepared-data manifest.
+The selected support threshold is recorded in the prepared-data manifest.
 
 ## Exploratory analysis
 
@@ -462,7 +517,7 @@ The notebook covers:
 - Selected numeric correlations
 - Synthetic-data limitations
 
-The notebook performs no model training or model selection.
+The notebook deliberately performs no model training or model selection.
 
 Stop JupyterLab with `Ctrl+C`.
 
@@ -473,6 +528,146 @@ python -m jupyter nbconvert --to notebook --execute --inplace analysis/notebooks
 ```
 
 Successful non-interactive execution confirms that the notebook does not depend on cells being run manually in an accidental order.
+
+## Train and evaluate the models
+
+Generate the synthetic and prepared datasets before running the modelling commands:
+
+```powershell
+python -m analysis.synthetic_data
+```
+
+```powershell
+python -m analysis.modelling_dataset
+```
+
+### Validate and train the models
+
+```powershell
+python -m analysis.model_training
+```
+
+This command:
+
+- Loads and validates the prepared chronological splits
+- Confirms the permitted feature contract
+- Trains the dummy baseline
+- Trains the logistic-regression pipeline
+- Reports validation metrics
+
+### Select the decision threshold
+
+```powershell
+python -m analysis.threshold_selection
+```
+
+Threshold selection uses validation data only.
+
+The selected threshold of 0.38 prioritises recall while requiring validation precision of at least 0.60.
+
+### Compare logistic regression and random forest
+
+```powershell
+python -m analysis.model_comparison
+```
+
+This compares both trained approaches on validation data using:
+
+- Accuracy
+- Balanced accuracy
+- Precision
+- Recall
+- F1 score
+- ROC AUC
+- Average precision
+- Brier score
+- Confusion-matrix counts
+
+### Analyse model errors
+
+```powershell
+python -m analysis.error_analysis
+```
+
+The error analysis examines:
+
+- True positives
+- True negatives
+- False positives
+- False negatives
+- Results by topic
+- Results by amount of recorded learner history
+
+### Interpret the logistic-regression model
+
+```powershell
+python -m analysis.model_interpretation
+```
+
+The interpretation reports transformed feature names, coefficients and odds ratios.
+
+Coefficients describe associations in synthetic data. They must not be interpreted as proof that a feature causes a learner to require support.
+
+### Run the final chronological test evaluation
+
+```powershell
+python -m analysis.final_evaluation
+```
+
+The selected logistic-regression pipeline and fixed threshold are evaluated against the held-out chronological test split.
+
+The final logistic-regression test results are:
+
+| Metric | Result |
+|---|---:|
+| Accuracy | 0.795 |
+| Balanced accuracy | 0.796 |
+| Precision | 0.583 |
+| Recall | 0.798 |
+| F1 score | 0.674 |
+| ROC AUC | 0.884 |
+| Average precision | 0.744 |
+| Specificity | 0.795 |
+| True negatives | 1,297 |
+| False positives | 335 |
+| False negatives | 119 |
+| True positives | 469 |
+
+These results apply only to the reproducible synthetic dataset.
+
+During development, the test evaluation was implemented earlier than the final tree-model comparison. No parameters or thresholds were changed using the test result. This sequencing limitation is documented transparently in `docs/model-evaluation.md`.
+
+## Save and reload the selected model
+
+Create the selected model artifact:
+
+```powershell
+python -m analysis.model_artifact
+```
+
+This writes:
+
+```text
+artifacts/models/tutorpulse_pipeline.joblib
+artifacts/models/tutorpulse_metadata.json
+```
+
+The metadata records:
+
+- The selected model name
+- The fixed decision threshold
+- The support threshold
+- The approved feature names
+- Training, validation and test-period information
+- Validation and test metrics
+- Runtime information
+- Responsible-use limitations
+
+The command reloads the saved pipeline and confirms that its predictions match the original in-memory model.
+
+The model artifact files are ignored by Git because they are reproducible build outputs.
+
+Joblib uses Python pickle internally. Never load a model artifact from an untrusted source.
 
 ## Run with Docker Compose
 
@@ -559,7 +754,7 @@ The `--volumes` option permanently removes only the database volume belonging to
 TutorPulse contains three complementary categories of automated tests:
 
 - Unit and isolated API tests
-- Analysis and leakage-safety tests
+- Analysis, leakage-safety and modelling tests
 - Integration tests using a real PostgreSQL test database
 
 ### Non-integration tests
@@ -573,7 +768,7 @@ python -m pytest tests --ignore=tests/integration -v
 Expected result:
 
 ```text
-73 passed
+124 passed
 ```
 
 The API and schema tests cover:
@@ -587,24 +782,31 @@ The API and schema tests cover:
 - Score validation
 - Intervention state rules
 
-The 16 analysis tests cover:
+The analysis and modelling tests cover:
 
 - Reproducible synthetic generation
 - Expected relational tables
-- Valid learner and topic values
 - Relational and score constraints
-- Unique learner-assessment-topic combinations
-- Valid intervention states
 - Presence of both target classes
 - Sufficient chronological periods
 - Accurate output manifests
 - Correct historical aggregates
-- Exclusion of same-day assessment results
-- Exclusion of future information
+- Exclusion of same-day and future information
 - Intervention creation and completion cutoffs
 - Prohibited feature checks
 - Complete non-overlapping chronological splits
 - Configurable support thresholds
+- Prepared-data contract validation
+- Feature and target separation
+- Baseline and logistic-regression training
+- Probability and metric calculations
+- Validation-only threshold selection
+- Random-forest comparison
+- Final chronological test evaluation
+- Model interpretation
+- Topic and history-depth error analysis
+- Model-artifact saving and reloading
+- Prediction equivalence after reloading
 
 ### PostgreSQL integration-test setup
 
@@ -700,7 +902,7 @@ python -m pytest -v
 Expected result:
 
 ```text
-91 passed
+142 passed
 ```
 
 Stop the test database when it is no longer needed:
@@ -725,14 +927,15 @@ The workflow:
 2. Starts a PostgreSQL 18.6 service
 3. Sets up Python 3.14
 4. Installs the API and analysis dependencies
-5. Applies the database migration
-6. Compiles the application, analysis and test files
-7. Regenerates the fictional relational dataset
-8. Rebuilds the leakage-safe modelling dataset
-9. Executes the exploratory-analysis notebook
-10. Runs all 91 automated tests
-11. Validates the Docker Compose configuration
-12. Builds the TutorPulse Docker image
+5. Checks that the required documentation exists
+6. Applies the database migration
+7. Compiles the application, analysis and test files
+8. Regenerates the fictional relational dataset
+9. Rebuilds the leakage-safe modelling dataset
+10. Executes the exploratory-analysis notebook
+11. Runs the complete automated test suite
+12. Validates the Docker Compose configuration
+13. Builds the TutorPulse Docker image
 
 A pull request should only be merged after the repository check completes successfully.
 
@@ -752,9 +955,13 @@ The database includes:
 - Synthetic seed data
 - Twelve reporting queries
 
-## Analysis documentation
+## Analysis and modelling documentation
 
-The Stage 5 modelling contract is available in `docs/modelling-scope.md`.
+The modelling contract is available in:
+
+```text
+docs/modelling-scope.md
+```
 
 It explains:
 
@@ -765,17 +972,36 @@ It explains:
 - Information permitted as features
 - Information prohibited as features
 - The chronological splitting strategy
-- The current seed-data limitations
 - Synthetic-data requirements
 - Database constraints
 - Ethical and practical limitations
-- The boundary between Stage 5 and later modelling work
+
+The completed model evaluation is available in:
+
+```text
+docs/model-evaluation.md
+```
+
+It explains:
+
+- The training, validation and test periods
+- Leakage controls
+- The dummy, logistic-regression and random-forest models
+- Threshold selection
+- Validation model comparison
+- Final test metrics
+- Error and subgroup analysis
+- Distribution shift
+- Coefficient interpretation
+- Model-artifact handling
+- Development-order limitations
+- Responsible-use limitations
 
 ## Responsible-use limitations
 
 TutorPulse is a portfolio and learning project, not a production educational decision system.
 
-The current analysis uses fictional data. It cannot demonstrate real-world predictive accuracy, fairness or educational benefit.
+The current analysis and models use fictional data. They cannot demonstrate real-world predictive accuracy, fairness or educational benefit.
 
 A real deployment would require:
 
@@ -784,15 +1010,19 @@ A real deployment would require:
 - Representative evaluation data
 - Fairness assessment
 - Monitoring for changing data distributions
+- Probability-calibration monitoring
 - Human review of predictions
 - Clear communication of uncertainty
 - Procedures for correcting inaccurate information
 - Appeal and review processes
 - Safeguards against punitive or automatic decisions
+- Defined retraining and model-retirement criteria
 
 Predictions should support tutor judgement rather than replace it.
 
 False negatives are particularly important because they represent learners who may need support but are not identified. False positives also matter because unnecessary interventions may consume tutor time and affect learner trust.
+
+The model does not establish why a learner obtained a particular result. Its coefficients describe associations in synthetic data rather than causal educational relationships.
 
 ## Initial user stories
 
@@ -812,14 +1042,12 @@ As a tutor, I want to view a learner's results by topic so that I can identify a
 
 Future TutorPulse stages include:
 
-- Training an interpretable baseline classification model
-- Training and comparing tree-based models
-- Evaluating precision, recall, F1, ROC-AUC and PR-AUC
-- Selecting decision thresholds based on the support use case
-- Documenting model behaviour and limitations
 - Adding governed inference to the FastAPI application
+- Validating inference requests against the saved feature contract
+- Returning model version and threshold information with predictions
 - Adding application and prediction logging
-- Monitoring changing input distributions
+- Monitoring changing input and prediction distributions
+- Adding model-health and operational monitoring
 - Publishing a documented release
 - Public deployment
 

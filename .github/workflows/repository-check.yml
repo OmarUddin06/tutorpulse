@@ -59,11 +59,13 @@ jobs:
         run: |
           test -f README.md
           test -f docs/modelling-scope.md
+          test -f docs/model-evaluation.md
 
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements-analysis.txt
+          python -m pip check
 
       - name: Install PostgreSQL client
         run: |
@@ -85,10 +87,13 @@ jobs:
       - name: Compile Python files
         run: python -m compileall app analysis tests
 
-      - name: Verify analysis pipeline
+      - name: Generate analysis data
         run: |
           python -m analysis.synthetic_data
           python -m analysis.modelling_dataset
+
+      - name: Execute exploratory-analysis notebook
+        run: |
           python -m jupyter nbconvert \
             --to notebook \
             --execute \
@@ -96,6 +101,21 @@ jobs:
             --output-dir /tmp \
             --output 01_exploratory_analysis.executed.ipynb \
             --ExecutePreprocessor.timeout=120
+
+      - name: Verify model training and evaluation
+        run: |
+          python -m analysis.model_training
+          python -m analysis.threshold_selection
+          python -m analysis.model_comparison
+          python -m analysis.error_analysis
+          python -m analysis.model_interpretation
+          python -m analysis.final_evaluation
+
+      - name: Verify saved model artifact
+        run: |
+          python -m analysis.model_artifact
+          test -f artifacts/models/tutorpulse_pipeline.joblib
+          test -f artifacts/models/tutorpulse_metadata.json
 
       - name: Run complete test suite
         run: python -m pytest -v
