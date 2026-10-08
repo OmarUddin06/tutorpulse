@@ -2,7 +2,7 @@
 
 TutorPulse is a learning-outcomes and intervention service for tutors.
 
-It provides a REST API for recording anonymised assessment results, monitoring topic-level performance and documenting support interventions. It also contains a reproducible data-analysis and machine-learning pipeline for preparing fictional learner outcomes, training classification models and evaluating learner-support risk predictions.
+It provides a REST API for recording anonymised assessment results, monitoring topic-level performance and documenting support interventions. It also contains a reproducible data-analysis and machine-learning pipeline for preparing fictional learner outcomes, training classification models, evaluating learner-support risk predictions and serving the selected model through a governed inference API.
 
 The project uses synthetic demonstration data and must not contain identifiable pupil information.
 
@@ -39,6 +39,14 @@ The API, analysis and modelling pipeline currently support:
 - Topic and history-depth error analysis
 - Logistic-regression coefficient interpretation
 - Reproducible saving and reloading of the selected modelling pipeline
+- A frozen 18-feature inference-request contract
+- Governed support-risk predictions with human-review metadata
+- Separate application-health and model-health endpoints
+- Trusted artifact validation during application startup
+- Privacy-aware prediction logging without raw feature payloads
+- A documented model card and monitoring plan
+- Docker builds that reproduce and package the trusted model artifact
+- Continuous integration that verifies a real containerised prediction
 
 ## Technology
 
@@ -69,6 +77,8 @@ Only fictional, synthetic or fully anonymised learner data may be used.
 Do not add real pupil names, contact details, school identifiers or other personal information to the database, source code, tests, screenshots, notebooks, model artifacts or repository history.
 
 The data-analysis generator creates fictional learner names such as `Synthetic Learner 001`. The generated patterns are demonstration assumptions and must not be presented as evidence about real learners.
+
+Inference logs use a randomly generated request identifier and operational model metadata. They deliberately exclude learner identifiers, raw feature payloads, assessment records and free-text intervention information.
 
 ## Modelling question
 
@@ -148,11 +158,14 @@ tutorpulse/
 │   │   ├── assessments.py
 │   │   ├── interventions.py
 │   │   ├── learners.py
+│   │   ├── predictions.py
 │   │   └── topics.py
 │   ├── __init__.py
 │   ├── config.py
 │   ├── database.py
+│   ├── inference_schemas.py
 │   ├── main.py
+│   ├── model_service.py
 │   ├── models.py
 │   └── schemas.py
 ├── database/
@@ -162,7 +175,10 @@ tutorpulse/
 │   ├── README.md
 │   └── seed.sql
 ├── docs/
+│   ├── inference-contract.md
+│   ├── model-card.md
 │   ├── model-evaluation.md
+│   ├── model-monitoring.md
 │   └── modelling-scope.md
 ├── tests/
 │   ├── analysis/
@@ -186,8 +202,11 @@ tutorpulse/
 │   ├── test_assessment_results.py
 │   ├── test_assessments.py
 │   ├── test_health.py
+│   ├── test_inference_schemas.py
 │   ├── test_interventions.py
 │   ├── test_learners.py
+│   ├── test_model_service.py
+│   ├── test_predictions.py
 │   ├── test_schemas.py
 │   └── test_topics.py
 ├── .dockerignore
@@ -199,6 +218,7 @@ tutorpulse/
 ├── Dockerfile
 ├── pytest.ini
 ├── requirements-analysis.txt
+├── requirements-model.txt
 ├── requirements.txt
 └── README.md
 ```
@@ -223,6 +243,8 @@ These locations are ignored by Git because their contents can be reproduced from
 | Resource | Path | Supported operations |
 |---|---|---|
 | Health check | `/health` | Read |
+| Model health | `/model/health` | Read |
+| Support-risk prediction | `/predictions/support-risk` | Create prediction |
 | Learners | `/learners` | Create, list, read, update and delete |
 | Topics | `/topics` | Create, list, read, update and delete |
 | Assessments | `/assessments` | Create, list, read, update and delete |
@@ -274,13 +296,21 @@ For API and database development only:
 python -m pip install -r requirements.txt
 ```
 
-For API, database, analysis and modelling development:
+For API, database and model-serving development:
+
+```powershell
+python -m pip install -r requirements-model.txt
+```
+
+For API, database, model-serving, analysis and notebook development:
 
 ```powershell
 python -m pip install -r requirements-analysis.txt
 ```
 
-The analysis requirements include the main project requirements through `-r requirements.txt`.
+The model requirements include the API requirements through `-r requirements.txt`.
+
+The analysis requirements include the model requirements through `-r requirements-model.txt`.
 
 The main dependencies include:
 
@@ -669,6 +699,62 @@ The model artifact files are ignored by Git because they are reproducible build 
 
 Joblib uses Python pickle internally. Never load a model artifact from an untrusted source.
 
+## Serve governed model predictions locally
+
+Generate the reproducible data, prepared modelling dataset and trusted artifact before starting the API:
+
+```powershell
+python -m analysis.synthetic_data
+```
+
+```powershell
+python -m analysis.modelling_dataset
+```
+
+```powershell
+python -m analysis.model_artifact
+```
+
+Start FastAPI:
+
+```powershell
+python -m uvicorn app.main:app --reload
+```
+
+During startup, TutorPulse loads and validates the trusted artifact once. The CRUD API remains independently testable, while model readiness is reported through a separate endpoint.
+
+Check basic application health:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/health
+```
+
+Check model readiness and governed metadata:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/model/health
+```
+
+The ready response identifies:
+
+- The `logistic_regression` model
+- Artifact schema version `1`
+- Decision threshold `0.38`
+
+Open the interactive documentation at `http://127.0.0.1:8000/docs` to try `POST /predictions/support-risk` using the documented 18-feature request.
+
+Every successful prediction returns:
+
+- A support-risk probability
+- A thresholded support flag
+- The decision and academic support thresholds
+- Model and artifact-version metadata
+- `human_review_required: true`
+
+Predictions are decision-support signals for tutor review. They do not create interventions or make educational decisions automatically.
+
+The complete request, response, validation, logging and failure contract is documented in `docs/inference-contract.md`.
+
 ## Run with Docker Compose
 
 Docker Compose provides an alternative to running FastAPI and PostgreSQL directly on the host computer.
@@ -676,10 +762,11 @@ Docker Compose provides an alternative to running FastAPI and PostgreSQL directl
 It creates:
 
 - A PostgreSQL database container
-- A FastAPI application container
+- A FastAPI application container containing the reproducibly built model artifact
 - A private Docker network connecting the services
 - A persistent Docker volume for the database data
-- Health checks for both services
+- A PostgreSQL health check
+- A model-readiness health check for the API container
 
 ### 1. Create the Docker environment file
 
@@ -697,7 +784,7 @@ The `.env.docker` file is ignored by Git and must not be committed.
 docker compose --env-file .env.docker up --build --detach
 ```
 
-The first build may take longer because Docker must download the required base images and install the Python dependencies.
+The first build may take longer because Docker must download the required base images, install the model-serving dependencies, generate the reproducible data and build the trusted model artifact.
 
 ### 3. Check the service status
 
@@ -711,15 +798,22 @@ The API is available at:
 
 - API: `http://127.0.0.1:8000`
 - Interactive documentation: `http://127.0.0.1:8000/docs`
-- Health check: `http://127.0.0.1:8000/health`
+- Application health: `http://127.0.0.1:8000/health`
+- Model health: `http://127.0.0.1:8000/model/health`
 
 The containerised PostgreSQL database is exposed to the host on port `5434`.
 
-### 4. Test the health endpoint
+### 4. Test the health endpoints
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8000/health
 ```
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/model/health
+```
+
+The second command must report that the `logistic_regression` model is ready with artifact schema version `1` and decision threshold `0.38`.
 
 ### 5. View the container logs
 
@@ -768,7 +862,7 @@ python -m pytest tests --ignore=tests/integration -v
 Expected result:
 
 ```text
-124 passed
+178 passed
 ```
 
 The API and schema tests cover:
@@ -807,6 +901,14 @@ The analysis and modelling tests cover:
 - Topic and history-depth error analysis
 - Model-artifact saving and reloading
 - Prediction equivalence after reloading
+- Inference-request bounds and cross-field consistency
+- Exact model-feature ordering
+- Human-review enforcement
+- Artifact loading and controlled unavailability
+- Governed prediction response construction
+- Model-health and prediction endpoints
+- Generic public inference failures
+- Privacy-aware logs that exclude feature payloads
 
 ### PostgreSQL integration-test setup
 
@@ -902,7 +1004,7 @@ python -m pytest -v
 Expected result:
 
 ```text
-142 passed
+196 passed
 ```
 
 Stop the test database when it is no longer needed:
@@ -924,18 +1026,23 @@ The GitHub Actions repository check runs automatically for every push and pull r
 The workflow:
 
 1. Checks out the repository
-2. Starts a PostgreSQL 18.6 service
+2. Starts a PostgreSQL 18.6 integration-test service
 3. Sets up Python 3.14
-4. Installs the API and analysis dependencies
-5. Checks that the required documentation exists
+4. Installs the API, model-serving and analysis dependencies
+5. Checks that the required modelling and governance documents exist
 6. Applies the database migration
 7. Compiles the application, analysis and test files
 8. Regenerates the fictional relational dataset
 9. Rebuilds the leakage-safe modelling dataset
 10. Executes the exploratory-analysis notebook
-11. Runs the complete automated test suite
-12. Validates the Docker Compose configuration
-13. Builds the TutorPulse Docker image
+11. Repeats the model-training and evaluation workflow
+12. Builds and reloads the trusted model artifact
+13. Runs the complete 196-test automated suite
+14. Validates the Docker Compose configuration
+15. Builds and starts the containerised inference service
+16. Verifies model health and performs a real containerised prediction
+17. Displays container logs if a step fails
+18. Removes the CI containers and volumes
 
 A pull request should only be merged after the repository check completes successfully.
 
@@ -997,6 +1104,38 @@ It explains:
 - Development-order limitations
 - Responsible-use limitations
 
+The governed inference contract is available in:
+
+```text
+docs/inference-contract.md
+```
+
+It explains:
+
+- The frozen 18-feature request
+- Request and response validation
+- Model-artifact loading
+- Model and application health
+- HTTP failure behaviour
+- Privacy-aware logging
+- Human-review requirements
+
+The model card is available in:
+
+```text
+docs/model-card.md
+```
+
+It records the model's intended purpose, training data, performance, threshold, limitations, fairness constraints, privacy requirements and change-control process.
+
+The monitoring plan is available in:
+
+```text
+docs/model-monitoring.md
+```
+
+It distinguishes the monitoring signals already implemented from future operational, drift, delayed-outcome and incident-response processes.
+
 ## Responsible-use limitations
 
 TutorPulse is a portfolio and learning project, not a production educational decision system.
@@ -1040,16 +1179,18 @@ As a tutor, I want to view a learner's results by topic so that I can identify a
 
 ## Planned development
 
-Future TutorPulse stages include:
+The governed inference stage is complete.
 
-- Adding governed inference to the FastAPI application
-- Validating inference requests against the saved feature contract
-- Returning model version and threshold information with predictions
-- Adding application and prediction logging
-- Monitoring changing input and prediction distributions
-- Adding model-health and operational monitoring
-- Publishing a documented release
-- Public deployment
+Future TutorPulse work includes:
+
+- Publishing a documented versioned release
+- Selecting an appropriate public hosting platform
+- Creating deployment-specific secrets and configuration
+- Adding production-grade authentication and authorisation before any sensitive use
+- Connecting operational metrics to a hosted monitoring backend
+- Adding dashboards and alert delivery
+- Establishing a governed real-outcome feedback process before any real-world evaluation
+- Completing the final public deployment and portfolio presentation
 
 ## Author
 
