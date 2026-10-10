@@ -193,7 +193,8 @@ tutorpulse/
 │   ├── model-card.md
 │   ├── model-evaluation.md
 │   ├── model-monitoring.md
-│   └── modelling-scope.md
+│   ├── modelling-scope.md
+│   └── portfolio-evidence.md
 ├── tests/
 │   ├── analysis/
 │   │   ├── test_error_analysis.py
@@ -1325,6 +1326,14 @@ docs/demo-script.md
 ```
 
 It provides a timed walkthrough of the problem, architecture, live PostgreSQL data, governed model inference, automated engineering evidence and honest limitations.
+
+The portfolio and interview evidence bank is available in:
+
+```text
+docs/portfolio-evidence.md
+```
+
+It provides concise project pitches, selectable CV bullets, a skills-evidence matrix, STAR examples, likely technical interview questions and responsible ways to describe the synthetic model results.
 
 ## Responsible-use limitations
 
