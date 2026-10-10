@@ -182,13 +182,15 @@ jobs:
 
           assert response.status == 200
           assert isinstance(learners, list)
-          assert len(learners) > 0
-          assert all(
-              learner["display_name"].startswith(
-                  "Synthetic "
-              )
+          assert [
+              learner["display_name"]
               for learner in learners
-          )
+          ] == [
+              "Learner 001",
+              "Learner 002",
+              "Learner 003",
+              "Learner 004",
+          ]
 
           blocked_request = Request(
               "http://127.0.0.1:8000/learners",
