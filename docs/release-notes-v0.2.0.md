@@ -123,4 +123,3 @@ A real deployment would require representative data, authentication and authoris
 - [Inference contract](inference-contract.md)
 - [Model card](model-card.md)
 - [Monitoring plan](model-monitoring.md)
-
