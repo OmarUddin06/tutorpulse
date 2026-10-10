@@ -186,6 +186,8 @@ tutorpulse/
 │   ├── README.md
 │   └── seed.sql
 ├── docs/
+│   ├── demo-script.md
+│   ├── deployment-evidence.md
 │   ├── deployment-plan.md
 │   ├── inference-contract.md
 │   ├── model-card.md
@@ -1307,6 +1309,22 @@ docs/deployment-plan.md
 ```
 
 It records the Render and Neon architecture, cost boundary, public read-only controls, secret-management requirements, hosted verification plan and known free-tier limitations.
+
+The completed technical deployment evidence is available in:
+
+```text
+docs/deployment-evidence.md
+```
+
+It records the hosted architecture, synthetic database counts, live endpoint results, blocked-write evidence, governed prediction result, automated checks, security controls and free-tier limitations. External feedback remains marked as pending until another person responds.
+
+The two-minute employer demonstration guide is available in:
+
+```text
+docs/demo-script.md
+```
+
+It provides a timed walkthrough of the problem, architecture, live PostgreSQL data, governed model inference, automated engineering evidence and honest limitations.
 
 ## Responsible-use limitations
 
