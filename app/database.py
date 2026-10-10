@@ -1,19 +1,18 @@
+"""TutorPulse database engine and session management."""
+
 from collections.abc import Generator
 
-from sqlalchemy import URL, create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Session,
+    sessionmaker,
+)
 
 from app.config import settings
 
 
-database_url = URL.create(
-    drivername="postgresql+psycopg",
-    username=settings.db_user,
-    password=settings.db_password,
-    host=settings.db_host,
-    port=settings.db_port,
-    database=settings.db_name,
-)
+database_url = settings.sqlalchemy_database_url()
 
 engine = create_engine(
     database_url,

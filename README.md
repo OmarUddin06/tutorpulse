@@ -47,6 +47,10 @@ The API, analysis and modelling pipeline currently support:
 - A documented model card and monitoring plan
 - Docker builds that reproduce and package the trusted model artifact
 - Continuous integration that verifies a real containerised prediction
+- A deployment-readiness endpoint covering PostgreSQL and model availability
+- Hosted PostgreSQL configuration using a secret connection string
+- A read-only public demonstration boundary that protects stored data
+- A live Docker deployment on Render backed by Neon PostgreSQL
 
 ## Technology
 
@@ -69,6 +73,8 @@ The API, analysis and modelling pipeline currently support:
 - Docker
 - Docker Compose
 - GitHub Actions
+- Render
+- Neon
 
 ## Privacy
 
@@ -79,6 +85,8 @@ Do not add real pupil names, contact details, school identifiers or other person
 The data-analysis generator creates fictional learner names such as `Synthetic Learner 001`. The generated patterns are demonstration assumptions and must not be presented as evidence about real learners.
 
 Inference logs use a randomly generated request identifier and operational model metadata. They deliberately exclude learner identifiers, raw feature payloads, assessment records and free-text intervention information.
+
+The hosted portfolio demonstration contains only synthetic seed data. Public database mutations are disabled, while read-only resources and governed model predictions remain available.
 
 ## Modelling question
 
@@ -163,10 +171,13 @@ tutorpulse/
 │   ├── __init__.py
 │   ├── config.py
 │   ├── database.py
+│   ├── demo_mode.py
 │   ├── inference_schemas.py
 │   ├── main.py
 │   ├── model_service.py
 │   ├── models.py
+│   ├── readiness.py
+│   ├── server.py
 │   └── schemas.py
 ├── database/
 │   ├── migrations/
@@ -175,11 +186,17 @@ tutorpulse/
 │   ├── README.md
 │   └── seed.sql
 ├── docs/
+│   ├── demo-script.md
+│   ├── deployment-evidence.md
+│   ├── deployment-plan.md
+│   ├── external-feedback.md
 │   ├── inference-contract.md
 │   ├── model-card.md
 │   ├── model-evaluation.md
 │   ├── model-monitoring.md
-│   └── modelling-scope.md
+│   ├── modelling-scope.md
+│   ├── portfolio-evidence.md
+│   └── release-notes-v0.2.0.md
 ├── tests/
 │   ├── analysis/
 │   │   ├── test_error_analysis.py
@@ -201,13 +218,17 @@ tutorpulse/
 │   │   └── test_transaction_isolation.py
 │   ├── test_assessment_results.py
 │   ├── test_assessments.py
+│   ├── test_demo_mode.py
+│   ├── test_deployment_config.py
 │   ├── test_health.py
 │   ├── test_inference_schemas.py
 │   ├── test_interventions.py
 │   ├── test_learners.py
 │   ├── test_model_service.py
 │   ├── test_predictions.py
+│   ├── test_readiness.py
 │   ├── test_schemas.py
+│   ├── test_server.py
 │   └── test_topics.py
 ├── .dockerignore
 ├── .env.docker.example
@@ -243,6 +264,7 @@ These locations are ignored by Git because their contents can be reproduced from
 | Resource | Path | Supported operations |
 |---|---|---|
 | Health check | `/health` | Read |
+| Deployment readiness | `/ready` | Read |
 | Model health | `/model/health` | Read |
 | Support-risk prediction | `/predictions/support-risk` | Create prediction |
 | Learners | `/learners` | Create, list, read, update and delete |
@@ -250,6 +272,164 @@ These locations are ignored by Git because their contents can be reproduced from
 | Assessments | `/assessments` | Create, list, read, update and delete |
 | Assessment results | `/assessment-results` | Create, list, read, update and delete |
 | Interventions | `/interventions` | Create, list, read, update and delete |
+
+## Live portfolio demonstration
+
+TutorPulse is deployed as a free, non-commercial portfolio demonstration:
+
+- API base address: [https://tutorpulse-s4oy.onrender.com](https://tutorpulse-s4oy.onrender.com)
+- Interactive API documentation: [https://tutorpulse-s4oy.onrender.com/docs](https://tutorpulse-s4oy.onrender.com/docs)
+- Application health: [https://tutorpulse-s4oy.onrender.com/health](https://tutorpulse-s4oy.onrender.com/health)
+- Deployment readiness: [https://tutorpulse-s4oy.onrender.com/ready](https://tutorpulse-s4oy.onrender.com/ready)
+- Model health: [https://tutorpulse-s4oy.onrender.com/model/health](https://tutorpulse-s4oy.onrender.com/model/health)
+
+> **Free-tier cold start:** the Render service sleeps after a period of inactivity. The first request may take approximately one minute while the service starts. Subsequent requests should respond normally.
+
+The base address is an API rather than a website, so `/` intentionally has no homepage. Start with `/docs` for the interactive interface.
+
+The hosted PostgreSQL database contains synthetic demonstration records only. The public service runs in read-only mode:
+
+- `GET`, `HEAD` and `OPTIONS` requests remain available;
+- database-creating, updating and deleting requests return `403 Forbidden`;
+- `POST /predictions/support-risk` remains available because it performs inference without changing stored records;
+- predictions are decision-support signals and always require human review.
+
+### Browser walkthrough for non-technical testers
+
+Swagger UI is the interactive documentation page generated by FastAPI. It lists TutorPulse's available actions and provides buttons for trying them in a web browser. No software, account, terminal or programming knowledge is required.
+
+Only use the two actions described below. Do not enter real names, learner information or other personal data.
+
+#### View the fictional learners
+
+1. Open [the TutorPulse interactive documentation](https://tutorpulse-s4oy.onrender.com/docs).
+2. If a loading page appears, wait for the free service to start. This may take approximately one minute.
+3. Find the **Learners** heading.
+4. Click the blue **GET /learners - List Learners** row.
+5. Click **Try it out**.
+6. Click **Execute**.
+7. Scroll slightly down to **Server response**.
+8. Confirm that **Code 200** appears and that the response lists four fictional records named `Learner 001` to `Learner 004`.
+
+#### Try a fictional support-risk prediction
+
+1. Find the **Model inference** heading.
+2. Click the green **POST /predictions/support-risk - Predict Support Risk** row.
+3. Click **Try it out**.
+4. Replace the contents of the **Request body** box with the complete fictional example below:
+
+```json
+{
+  "topic_name": "Algebra",
+  "maximum_score": 20.0,
+  "prior_assessment_count": 5,
+  "prior_result_count": 18,
+  "prior_average_percentage": 64.2,
+  "prior_minimum_percentage": 42.0,
+  "prior_maximum_percentage": 88.0,
+  "prior_support_count": 6,
+  "prior_support_rate": 0.3333,
+  "previous_assessment_average_percentage": 61.5,
+  "days_since_previous_assessment": 14,
+  "prior_same_topic_count": 4,
+  "prior_same_topic_average_percentage": 58.5,
+  "prior_same_topic_latest_percentage": 62.0,
+  "prior_same_topic_support_count": 2,
+  "prior_intervention_count": 3,
+  "prior_same_topic_intervention_count": 1,
+  "prior_completed_intervention_count": 2
+}
+```
+
+5. Click **Execute**.
+6. Scroll to **Server response**.
+7. Confirm that **Code 200** appears.
+8. Confirm that the response contains a `support_probability`, `model_name` of `logistic_regression` and `human_review_required` set to `true`.
+
+This prediction uses fictional historical values. It does not create an intervention, change the database or make an educational decision.
+
+#### How to read the prediction response
+
+| Field | Meaning |
+|---|---|
+| `support_probability` | The model's estimated probability from `0` to `1` that the fictional future result belongs to the below-60% support class. It is not a certainty or a diagnosis. |
+| `decision_threshold` | The probability cutoff used to create the yes-or-no support flag. TutorPulse uses `0.38`, selected on validation data to prioritise recall while requiring at least 60% precision. |
+| `predicted_needs_support` | `true` when `support_probability` is greater than or equal to `decision_threshold`; otherwise `false`. |
+| `support_threshold` | The assessment-percentage rule used to define the training target. A fictional result below `60.0%` is labelled as needing support. This is different from the probability decision threshold. |
+| `model_name` | The selected `logistic_regression` model. |
+| `artifact_schema_version` | The version of the saved model contract. |
+| `human_review_required` | Always `true`. The prediction is a signal for tutor review and must never make an automatic educational decision. |
+
+For the supplied example, `0.4121` means approximately 41.21%. It produces `predicted_needs_support: true` because 41.21% is above the selected 38% probability threshold. A default cutoff of 50% is not used. Human review is still required regardless of the returned probability.
+
+> **End of the browser walkthrough:** non-technical testers can stop here and return to the feedback questions they were sent.
+
+### Try the hosted read-only API
+
+The following PowerShell commands use no credentials:
+
+```powershell
+$baseUrl = "https://tutorpulse-s4oy.onrender.com"
+```
+
+```powershell
+Invoke-RestMethod "$baseUrl/ready" |
+    ConvertTo-Json -Depth 10
+```
+
+```powershell
+$hostedLearners = Invoke-RestMethod "$baseUrl/learners"
+
+$hostedLearners |
+    Select-Object id, display_name, created_at |
+    Format-Table
+
+Write-Host "Learner count:" $hostedLearners.Count
+```
+
+The readiness response should report that the application, database and model are ready. The learner table should show four fictional seed records and the count should be `4`.
+
+All four records have the same `created_at` value because the deterministic seed data inserts them together in one batch.
+
+### Try a governed support-risk prediction
+
+This example uses fictional historical features and does not create or modify a learner record:
+
+```powershell
+$predictionBody = @{
+    topic_name = "Algebra"
+    maximum_score = 20.0
+    prior_assessment_count = 5
+    prior_result_count = 18
+    prior_average_percentage = 64.2
+    prior_minimum_percentage = 42.0
+    prior_maximum_percentage = 88.0
+    prior_support_count = 6
+    prior_support_rate = 0.3333
+    previous_assessment_average_percentage = 61.5
+    days_since_previous_assessment = 14
+    prior_same_topic_count = 4
+    prior_same_topic_average_percentage = 58.5
+    prior_same_topic_latest_percentage = 62.0
+    prior_same_topic_support_count = 2
+    prior_intervention_count = 3
+    prior_same_topic_intervention_count = 1
+    prior_completed_intervention_count = 2
+} | ConvertTo-Json
+```
+
+```powershell
+Invoke-RestMethod `
+    -Uri "$baseUrl/predictions/support-risk" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $predictionBody |
+    ConvertTo-Json -Depth 10
+```
+
+The response includes the support probability, thresholded support flag, frozen model metadata and `human_review_required: true`. Interpret those fields using the response table in the browser walkthrough above. Results demonstrate the software workflow only and must not be interpreted as evidence about real learners.
+
+> **End of the technical hosted-demo walkthrough:** technical testers can stop here. The following local-setup section is only for someone who wants to clone and run the project.
 
 ## Local setup
 
@@ -403,6 +583,12 @@ The health check is available at:
 
 ```text
 http://127.0.0.1:8000/health
+```
+
+The deployment-readiness check is available at:
+
+```text
+http://127.0.0.1:8000/ready
 ```
 
 Stop the development server by pressing `Ctrl+C`.
@@ -799,6 +985,7 @@ The API is available at:
 - API: `http://127.0.0.1:8000`
 - Interactive documentation: `http://127.0.0.1:8000/docs`
 - Application health: `http://127.0.0.1:8000/health`
+- Deployment readiness: `http://127.0.0.1:8000/ready`
 - Model health: `http://127.0.0.1:8000/model/health`
 
 The containerised PostgreSQL database is exposed to the host on port `5434`.
@@ -862,7 +1049,7 @@ python -m pytest tests --ignore=tests/integration -v
 Expected result:
 
 ```text
-178 passed
+196 passed
 ```
 
 The API and schema tests cover:
@@ -909,6 +1096,10 @@ The analysis and modelling tests cover:
 - Model-health and prediction endpoints
 - Generic public inference failures
 - Privacy-aware logs that exclude feature payloads
+- Hosted database URL normalisation and configuration precedence
+- Platform-provided port handling
+- Deployment-readiness reporting
+- Read-only demonstration-mode enforcement
 
 ### PostgreSQL integration-test setup
 
@@ -1004,7 +1195,7 @@ python -m pytest -v
 Expected result:
 
 ```text
-196 passed
+214 passed
 ```
 
 Stop the test database when it is no longer needed:
@@ -1037,12 +1228,15 @@ The workflow:
 10. Executes the exploratory-analysis notebook
 11. Repeats the model-training and evaluation workflow
 12. Builds and reloads the trusted model artifact
-13. Runs the complete 196-test automated suite
+13. Runs the complete 214-test automated suite
 14. Validates the Docker Compose configuration
-15. Builds and starts the containerised inference service
-16. Verifies model health and performs a real containerised prediction
-17. Displays container logs if a step fails
-18. Removes the CI containers and volumes
+15. Builds the containerised inference service
+16. Starts the containerised service in read-only demonstration mode
+17. Verifies readiness, model health and the exact synthetic seed records
+18. Confirms that database writes are blocked
+19. Performs a real governed containerised prediction
+20. Displays container logs if a step fails
+21. Removes the CI containers and volumes
 
 A pull request should only be merged after the repository check completes successfully.
 
@@ -1136,6 +1330,54 @@ docs/model-monitoring.md
 
 It distinguishes the monitoring signals already implemented from future operational, drift, delayed-outcome and incident-response processes.
 
+The free portfolio deployment plan is available in:
+
+```text
+docs/deployment-plan.md
+```
+
+It records the Render and Neon architecture, cost boundary, public read-only controls, secret-management requirements, hosted verification plan and known free-tier limitations.
+
+The completed technical deployment evidence is available in:
+
+```text
+docs/deployment-evidence.md
+```
+
+It records the hosted architecture, synthetic database counts, live endpoint results, blocked-write evidence, governed prediction result, automated checks, security controls, completed external verification and free-tier limitations.
+
+The two-minute employer demonstration guide is available in:
+
+```text
+docs/demo-script.md
+```
+
+It provides a timed walkthrough of the problem, architecture, live PostgreSQL data, governed model inference, automated engineering evidence and honest limitations.
+
+The portfolio and interview evidence bank is available in:
+
+```text
+docs/portfolio-evidence.md
+```
+
+It provides concise project pitches, selectable CV bullets, a skills-evidence matrix, STAR examples, likely technical interview questions and responsible ways to describe the synthetic model results.
+
+The anonymised external demonstration feedback is available in:
+
+```text
+docs/external-feedback.md
+```
+
+It records the successful browser and PowerShell walkthroughs, the tester's usability observations, the prioritised interpretation problem, the README improvements made in response and the reason no new application regression test was required.
+
+The version `0.2.0` release notes are available in:
+
+```text
+docs/release-notes-v0.2.0.md
+```
+
+They summarise the complete application, data, modelling, inference, testing, deployment and external-verification evidence for the first public portfolio release.
+
 ## Responsible-use limitations
 
 TutorPulse is a portfolio and learning project, not a production educational decision system.
@@ -1179,18 +1421,16 @@ As a tutor, I want to view a learner's results by topic so that I can identify a
 
 ## Planned development
 
-The governed inference stage is complete.
+The governed inference stage is complete, and the Stage 8 portfolio deployment is live and technically verified. External demonstration feedback has been incorporated, and final release packaging is in progress.
 
 Future TutorPulse work includes:
 
-- Publishing a documented versioned release
-- Selecting an appropriate public hosting platform
-- Creating deployment-specific secrets and configuration
+- Publishing the first documented versioned release
+- Adding an optional tutor-facing frontend
 - Adding production-grade authentication and authorisation before any sensitive use
 - Connecting operational metrics to a hosted monitoring backend
 - Adding dashboards and alert delivery
 - Establishing a governed real-outcome feedback process before any real-world evaluation
-- Completing the final public deployment and portfolio presentation
 
 ## Author
 

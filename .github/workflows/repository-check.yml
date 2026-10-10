@@ -64,6 +64,7 @@ jobs:
           test -f docs/inference-contract.md
           test -f docs/model-card.md
           test -f docs/model-monitoring.md
+          test -f docs/deployment-plan.md
 
       - name: Install Python dependencies
         run: |
@@ -130,31 +131,101 @@ jobs:
       - name: Build containerised inference service
         run: docker compose build api
 
-      - name: Start containerised inference service
+      - name: Start read-only containerised demo
+        env:
+          TUTORPULSE_DEMO_READ_ONLY: "true"
         run: |
           docker compose up \
             --detach \
             --wait \
             --wait-timeout 180
 
-      - name: Verify containerised model inference
+      - name: Verify containerised public demo
         run: |
           python - <<'PY'
           import json
+          from urllib.error import HTTPError
           from urllib.request import Request, urlopen
+
+          with urlopen(
+              "http://127.0.0.1:8000/ready",
+              timeout=10,
+          ) as response:
+              readiness = json.load(response)
+
+          assert response.status == 200
+          assert readiness == {
+              "status": "ready",
+              "database": "ready",
+              "model": "ready",
+          }
 
           with urlopen(
               "http://127.0.0.1:8000/model/health",
               timeout=10,
           ) as response:
-              health = json.load(response)
+              model_health = json.load(response)
 
           assert response.status == 200
-          assert health == {
+          assert model_health == {
               "status": "ready",
               "model_name": "logistic_regression",
               "artifact_schema_version": 1,
               "decision_threshold": 0.38,
+          }
+
+          with urlopen(
+              "http://127.0.0.1:8000/learners",
+              timeout=10,
+          ) as response:
+              learners = json.load(response)
+
+          assert response.status == 200
+          assert isinstance(learners, list)
+          assert [
+              learner["display_name"]
+              for learner in learners
+          ] == [
+              "Learner 001",
+              "Learner 002",
+              "Learner 003",
+              "Learner 004",
+          ]
+
+          blocked_request = Request(
+              "http://127.0.0.1:8000/learners",
+              data=json.dumps(
+                  {
+                      "display_name": (
+                          "Unauthorised Public Change"
+                      )
+                  }
+              ).encode("utf-8"),
+              headers={
+                  "Content-Type": "application/json"
+              },
+              method="POST",
+          )
+
+          try:
+              urlopen(
+                  blocked_request,
+                  timeout=10,
+              )
+          except HTTPError as error:
+              blocked_response = json.load(error)
+              assert error.code == 403
+          else:
+              raise AssertionError(
+                  "Public database write was not blocked"
+              )
+
+          assert blocked_response == {
+              "detail": (
+                  "TutorPulse is running as a read-only "
+                  "portfolio demo. Stored demonstration "
+                  "data cannot be changed."
+              )
           }
 
           payload = {
@@ -178,29 +249,61 @@ jobs:
               "prior_completed_intervention_count": 2,
           }
 
-          request = Request(
-              "http://127.0.0.1:8000/predictions/support-risk",
-              data=json.dumps(payload).encode("utf-8"),
-              headers={"Content-Type": "application/json"},
+          prediction_request = Request(
+              (
+                  "http://127.0.0.1:8000/"
+                  "predictions/support-risk"
+              ),
+              data=json.dumps(
+                  payload
+              ).encode("utf-8"),
+              headers={
+                  "Content-Type": "application/json"
+              },
               method="POST",
           )
 
-          with urlopen(request, timeout=10) as response:
+          with urlopen(
+              prediction_request,
+              timeout=10,
+          ) as response:
               prediction = json.load(response)
 
           assert response.status == 200
-          assert 0.0 <= prediction["support_probability"] <= 1.0
+          assert (
+              0.0
+              <= prediction["support_probability"]
+              <= 1.0
+          )
           assert isinstance(
               prediction["predicted_needs_support"],
               bool,
           )
           assert prediction["decision_threshold"] == 0.38
           assert prediction["support_threshold"] == 60.0
-          assert prediction["model_name"] == "logistic_regression"
-          assert prediction["artifact_schema_version"] == 1
-          assert prediction["human_review_required"] is True
+          assert (
+              prediction["model_name"]
+              == "logistic_regression"
+          )
+          assert (
+              prediction["artifact_schema_version"]
+              == 1
+          )
+          assert (
+              prediction["human_review_required"]
+              is True
+          )
 
-          print("Model health:", health)
+          print("Readiness:", readiness)
+          print("Model health:", model_health)
+          print(
+              "Synthetic learner count:",
+              len(learners),
+          )
+          print(
+              "Blocked write:",
+              blocked_response,
+          )
           print("Prediction:", prediction)
           PY
 
