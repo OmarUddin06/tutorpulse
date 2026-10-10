@@ -34,6 +34,7 @@ services:
       TUTORPULSE_DB_USER: postgres
       TUTORPULSE_DB_PASSWORD: ${TUTORPULSE_DOCKER_DB_PASSWORD:?Set TUTORPULSE_DOCKER_DB_PASSWORD in .env.docker}
       TUTORPULSE_MODEL_ARTIFACT_DIRECTORY: /app/artifacts/models
+      TUTORPULSE_DEMO_READ_ONLY: ${TUTORPULSE_DEMO_READ_ONLY:-false}
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:
