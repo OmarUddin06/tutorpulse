@@ -27,6 +27,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      PORT: 8000
       TUTORPULSE_DB_HOST: database
       TUTORPULSE_DB_PORT: 5432
       TUTORPULSE_DB_NAME: tutorpulse
@@ -43,7 +44,7 @@ services:
         - CMD
         - python
         - -c
-        - import urllib.request; urllib.request.urlopen('http://localhost:8000/model/health')
+        - import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')
       interval: 10s
       timeout: 3s
       retries: 5
