@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.config import settings
+from app.demo_mode import enforce_demo_read_only
 from app.model_service import load_model_runtime
 from app.routers.assessment_results import (
     router as assessment_results_router,
@@ -51,6 +52,10 @@ app = FastAPI(
     ),
     version="0.2.0",
     lifespan=lifespan,
+)
+
+app.middleware("http")(
+    enforce_demo_read_only
 )
 
 app.include_router(interventions_router)
