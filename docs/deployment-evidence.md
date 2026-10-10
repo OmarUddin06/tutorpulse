@@ -157,14 +157,16 @@ The workflow associated with the live-deployment documentation commit `00ce552` 
 
 ## External feedback status
 
-An anonymised external demonstration request was sent on 10 October 2026.
+One anonymised external tester completed both the browser and PowerShell walkthroughs on 10 October 2026.
 
-Feedback is pending. It must not be marked complete until another person has attempted the supplied browser walkthrough and reported whether the instructions, read-only endpoint and fictional prediction were understandable and reliable.
+The tester confirmed that the service, fictional learners, readiness checks and governed prediction worked successfully. The free-tier cold start took approximately 30 to 40 seconds and remained understandable because Render displayed its loading page.
 
-No tester name, email address or other personal information will be recorded.
+The highest-value issue was insufficient explanation of the prediction response. The README was updated to explain the probability, decision threshold, academic support threshold, thresholded flag and human-review requirement. The technical learners example was also adjusted to avoid a confusing PowerShell array wrapper.
+
+The anonymised findings, prioritisation and action are recorded in `docs/external-feedback.md`. No tester name, email address or other personal information is recorded.
 
 ## Conclusion
 
 The technical deployment checkpoint is complete. TutorPulse is publicly accessible, connects to hosted PostgreSQL, loads the governed model artifact, exposes health and readiness evidence, serves synthetic data, blocks database mutations and permits controlled model inference.
 
-Stage 8 remains open until external feedback is recorded and acted on, the final pull request is merged, the release is tagged and the portfolio learning documents are finalised.
+External feedback is complete and has been acted on. Stage 8 remains open until the final pull request is merged, the release is tagged and the portfolio learning documents are finalised.

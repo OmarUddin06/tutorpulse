@@ -189,6 +189,7 @@ tutorpulse/
 │   ├── demo-script.md
 │   ├── deployment-evidence.md
 │   ├── deployment-plan.md
+│   ├── external-feedback.md
 │   ├── inference-contract.md
 │   ├── model-card.md
 │   ├── model-evaluation.md
@@ -346,6 +347,22 @@ Only use the two actions described below. Do not enter real names, learner infor
 
 This prediction uses fictional historical values. It does not create an intervention, change the database or make an educational decision.
 
+#### How to read the prediction response
+
+| Field | Meaning |
+|---|---|
+| `support_probability` | The model's estimated probability from `0` to `1` that the fictional future result belongs to the below-60% support class. It is not a certainty or a diagnosis. |
+| `decision_threshold` | The probability cutoff used to create the yes-or-no support flag. TutorPulse uses `0.38`, selected on validation data to prioritise recall while requiring at least 60% precision. |
+| `predicted_needs_support` | `true` when `support_probability` is greater than or equal to `decision_threshold`; otherwise `false`. |
+| `support_threshold` | The assessment-percentage rule used to define the training target. A fictional result below `60.0%` is labelled as needing support. This is different from the probability decision threshold. |
+| `model_name` | The selected `logistic_regression` model. |
+| `artifact_schema_version` | The version of the saved model contract. |
+| `human_review_required` | Always `true`. The prediction is a signal for tutor review and must never make an automatic educational decision. |
+
+For the supplied example, `0.4121` means approximately 41.21%. It produces `predicted_needs_support: true` because 41.21% is above the selected 38% probability threshold. A default cutoff of 50% is not used. Human review is still required regardless of the returned probability.
+
+> **End of the browser walkthrough:** non-technical testers can stop here and return to the feedback questions they were sent.
+
 ### Try the hosted read-only API
 
 The following PowerShell commands use no credentials:
@@ -360,11 +377,18 @@ Invoke-RestMethod "$baseUrl/ready" |
 ```
 
 ```powershell
-Invoke-RestMethod "$baseUrl/learners" |
-    ConvertTo-Json -Depth 10
+$hostedLearners = Invoke-RestMethod "$baseUrl/learners"
+
+$hostedLearners |
+    Select-Object id, display_name, created_at |
+    Format-Table
+
+Write-Host "Learner count:" $hostedLearners.Count
 ```
 
-The readiness response should report that the application, database and model are ready. The learners response contains four fictional seed records.
+The readiness response should report that the application, database and model are ready. The learner table should show four fictional seed records and the count should be `4`.
+
+All four records have the same `created_at` value because the deterministic seed data inserts them together in one batch.
 
 ### Try a governed support-risk prediction
 
@@ -402,7 +426,9 @@ Invoke-RestMethod `
     ConvertTo-Json -Depth 10
 ```
 
-The response includes the support probability, thresholded support flag, frozen model metadata and `human_review_required: true`. Results demonstrate the software workflow only and must not be interpreted as evidence about real learners.
+The response includes the support probability, thresholded support flag, frozen model metadata and `human_review_required: true`. Interpret those fields using the response table in the browser walkthrough above. Results demonstrate the software workflow only and must not be interpreted as evidence about real learners.
+
+> **End of the technical hosted-demo walkthrough:** technical testers can stop here. The following local-setup section is only for someone who wants to clone and run the project.
 
 ## Local setup
 
@@ -1335,6 +1361,14 @@ docs/portfolio-evidence.md
 
 It provides concise project pitches, selectable CV bullets, a skills-evidence matrix, STAR examples, likely technical interview questions and responsible ways to describe the synthetic model results.
 
+The anonymised external demonstration feedback is available in:
+
+```text
+docs/external-feedback.md
+```
+
+It records the successful browser and PowerShell walkthroughs, the tester's usability observations, the prioritised interpretation problem, the README improvements made in response and the reason no new application regression test was required.
+
 ## Responsible-use limitations
 
 TutorPulse is a portfolio and learning project, not a production educational decision system.
@@ -1378,11 +1412,10 @@ As a tutor, I want to view a learner's results by topic so that I can identify a
 
 ## Planned development
 
-The governed inference stage is complete, and the Stage 8 portfolio deployment is live and technically verified. External demonstration feedback and final release packaging are in progress.
+The governed inference stage is complete, and the Stage 8 portfolio deployment is live and technically verified. External demonstration feedback has been incorporated, and final release packaging is in progress.
 
 Future TutorPulse work includes:
 
-- Acting on structured external demonstration feedback
 - Publishing the first documented versioned release
 - Adding an optional tutor-facing frontend
 - Adding production-grade authentication and authorisation before any sensitive use
