@@ -195,7 +195,8 @@ tutorpulse/
 │   ├── model-evaluation.md
 │   ├── model-monitoring.md
 │   ├── modelling-scope.md
-│   └── portfolio-evidence.md
+│   ├── portfolio-evidence.md
+│   └── release-notes-v0.2.0.md
 ├── tests/
 │   ├── analysis/
 │   │   ├── test_error_analysis.py
@@ -1343,7 +1344,7 @@ The completed technical deployment evidence is available in:
 docs/deployment-evidence.md
 ```
 
-It records the hosted architecture, synthetic database counts, live endpoint results, blocked-write evidence, governed prediction result, automated checks, security controls and free-tier limitations. External feedback remains marked as pending until another person responds.
+It records the hosted architecture, synthetic database counts, live endpoint results, blocked-write evidence, governed prediction result, automated checks, security controls, completed external verification and free-tier limitations.
 
 The two-minute employer demonstration guide is available in:
 
@@ -1368,6 +1369,14 @@ docs/external-feedback.md
 ```
 
 It records the successful browser and PowerShell walkthroughs, the tester's usability observations, the prioritised interpretation problem, the README improvements made in response and the reason no new application regression test was required.
+
+The version `0.2.0` release notes are available in:
+
+```text
+docs/release-notes-v0.2.0.md
+```
+
+They summarise the complete application, data, modelling, inference, testing, deployment and external-verification evidence for the first public portfolio release.
 
 ## Responsible-use limitations
 
