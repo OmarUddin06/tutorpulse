@@ -1,0 +1,446 @@
+<div id="tp-wireframes" class="viz-dotted-background">
+  <style>
+    #tp-wireframes {
+      color-scheme: dark;
+      --tp-page: #120b22;
+      --tp-surface: #1b1131;
+      --tp-surface-2: #28184a;
+      --tp-surface-3: #35215f;
+      --tp-text: #f7f2ff;
+      --tp-muted: #c7b9df;
+      --tp-line: #49366c;
+      --tp-strong-line: #745a9e;
+      --tp-accent: #9b6cff;
+      --tp-accent-2: #c6adff;
+      --tp-accent-soft: #33205c;
+      --tp-good-strong: #1f8f5f;
+      --tp-good: #64cc91;
+      --tp-warn: #e99b3a;
+      --tp-danger: #ef646d;
+      --tp-unassessed: #7e718f;
+      color: var(--tp-text);
+      padding: 12px;
+    }
+    #tp-wireframes * { box-sizing: border-box; }
+    #tp-wireframes .tp-reviewbar {
+      display: flex;
+      gap: 12px;
+      align-items: end;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      color: var(--tp-text);
+    }
+    #tp-wireframes .tp-field { display: grid; gap: 5px; min-width: 220px; }
+    #tp-wireframes .tp-field label { color: var(--tp-muted); font-size: 12px; }
+    #tp-wireframes select {
+      min-height: 40px;
+      border: 1px solid var(--tp-line);
+      border-radius: 8px;
+      padding: 8px 34px 8px 10px;
+      color: var(--tp-text);
+      background: var(--tp-surface);
+      font: inherit;
+    }
+    #tp-wireframes .tp-window {
+      width: 100%;
+      min-height: 700px;
+      overflow: hidden;
+      border: 1px solid var(--tp-strong-line);
+      border-radius: 12px;
+      background: var(--tp-page);
+      color: var(--tp-text);
+      transition: max-width 180ms ease;
+      margin-inline: auto;
+    }
+    #tp-wireframes .tp-window.mobile { max-width: 390px; min-height: 760px; }
+    #tp-wireframes .tp-browser {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--tp-line);
+      background: var(--tp-surface-2);
+    }
+    #tp-wireframes .tp-dot {
+      width: 8px;
+      height: 8px;
+      border: 1px solid var(--tp-strong-line);
+      border-radius: 50%;
+    }
+    #tp-wireframes .tp-url {
+      margin-left: 8px;
+      height: 20px;
+      flex: 1;
+      border: 1px solid var(--tp-line);
+      border-radius: 5px;
+      background: var(--tp-surface);
+    }
+    #tp-wireframes .tp-shell { min-height: 664px; display: grid; grid-template-columns: 188px 1fr; }
+    #tp-wireframes .tp-sidebar {
+      border-right: 1px solid var(--tp-line);
+      background: var(--tp-surface);
+      padding: 18px 12px;
+    }
+    #tp-wireframes .tp-logo { display: flex; align-items: center; gap: 9px; margin-bottom: 24px; font-weight: 500; }
+    #tp-wireframes .tp-logo-mark { width: 26px; height: 26px; border: 2px solid var(--tp-accent); border-radius: 6px; }
+    #tp-wireframes .tp-role { color: var(--tp-muted); font-size: 12px; margin-bottom: 12px; }
+    #tp-wireframes .tp-nav { display: grid; gap: 5px; }
+    #tp-wireframes .tp-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 7px 9px;
+      border-radius: 7px;
+      color: var(--tp-muted);
+    }
+    #tp-wireframes .tp-nav-item.active { color: var(--tp-text); background: var(--tp-accent-soft); font-weight: 500; }
+    #tp-wireframes .tp-nav-item svg { width: 16px; height: 16px; }
+    #tp-wireframes .tp-exit { margin-top: 24px; border-top: 1px solid var(--tp-line); padding-top: 14px; color: var(--tp-muted); }
+    #tp-wireframes .tp-main { min-width: 0; }
+    #tp-wireframes .tp-topbar {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 22px;
+      border-bottom: 1px solid var(--tp-line);
+      background: var(--tp-surface);
+    }
+    #tp-wireframes .tp-mobile-menu { display: none; }
+    #tp-wireframes .tp-context { display: grid; gap: 2px; }
+    #tp-wireframes .tp-kicker { color: var(--tp-muted); font-size: 12px; }
+    #tp-wireframes .tp-title { font-weight: 500; }
+    #tp-wireframes .tp-content { padding: 22px; display: grid; gap: 18px; }
+    #tp-wireframes .tp-headingrow { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+    #tp-wireframes h1, #tp-wireframes h2, #tp-wireframes h3 { margin: 0; color: var(--tp-text); }
+    #tp-wireframes h1 { font-size: 24px; font-weight: 500; }
+    #tp-wireframes h2 { font-size: 17px; font-weight: 500; }
+    #tp-wireframes h3 { font-size: 14px; font-weight: 500; }
+    #tp-wireframes p { margin: 0; color: var(--tp-muted); }
+    #tp-wireframes .tp-button {
+      min-height: 38px;
+      border-radius: 7px;
+      border: 1px solid var(--tp-strong-line);
+      padding: 8px 12px;
+      background: var(--tp-surface);
+      color: var(--tp-text);
+      font: inherit;
+      font-weight: 500;
+    }
+    #tp-wireframes .tp-button.primary { background: var(--tp-accent); border-color: var(--tp-accent); color: #160d28; }
+    #tp-wireframes .tp-button.ghost { border-color: transparent; color: var(--tp-muted); }
+    #tp-wireframes .tp-button:disabled { opacity: .45; }
+    #tp-wireframes .tp-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    #tp-wireframes .tp-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #tp-wireframes .tp-panel {
+      min-width: 0;
+      border: 1px solid var(--tp-line);
+      border-radius: 9px;
+      background: var(--tp-surface);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    #tp-wireframes .tp-stat { font-size: 24px; font-weight: 500; }
+    #tp-wireframes .tp-meta { color: var(--tp-muted); font-size: 12px; }
+    #tp-wireframes .tp-list { display: grid; gap: 8px; }
+    #tp-wireframes .tp-row {
+      min-height: 46px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(70px, .8fr) minmax(80px, .9fr);
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--tp-line);
+    }
+    #tp-wireframes .tp-row:last-child { border-bottom: 0; }
+    #tp-wireframes .tp-pill { display: inline-flex; width: fit-content; border-radius: 999px; background: var(--tp-accent-soft); padding: 4px 8px; font-size: 12px; }
+    #tp-wireframes .tp-line { height: 10px; border-radius: 4px; background: var(--tp-line); }
+    #tp-wireframes .tp-line.short { width: 42%; }
+    #tp-wireframes .tp-line.medium { width: 70%; }
+    #tp-wireframes .tp-bars { height: 110px; display: flex; align-items: end; gap: 9px; padding-top: 12px; border-bottom: 1px solid var(--tp-strong-line); }
+    #tp-wireframes .tp-bar { flex: 1; min-width: 10px; background: var(--tp-accent-soft); border-radius: 4px 4px 0 0; }
+    #tp-wireframes .tp-note { border-left: 4px solid var(--tp-accent); background: var(--tp-accent-soft); padding: 10px 12px; color: var(--tp-text); }
+    #tp-wireframes .tp-note.warn { border-left-color: var(--tp-warn); }
+    #tp-wireframes .tp-note.error { border-left-color: var(--tp-danger); }
+    #tp-wireframes .tp-progress { height: 10px; border-radius: 999px; background: var(--tp-line); overflow: hidden; }
+    #tp-wireframes .tp-progress > span { display: block; height: 100%; background: var(--tp-accent); }
+    #tp-wireframes .tp-progress.very-strong > span { background: var(--tp-good-strong); }
+    #tp-wireframes .tp-progress.strong > span { background: var(--tp-good); }
+    #tp-wireframes .tp-progress.developing > span { background: var(--tp-warn); }
+    #tp-wireframes .tp-progress.priority > span { background: var(--tp-danger); }
+    #tp-wireframes .tp-progress.unassessed > span { background: var(--tp-unassessed); }
+    #tp-wireframes .tp-topic-row {
+      display: grid;
+      grid-template-columns: minmax(170px, 1.4fr) minmax(140px, 1fr) minmax(180px, 1.2fr) auto;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--tp-line);
+    }
+    #tp-wireframes .tp-topic-row:last-child { border-bottom: 0; }
+    #tp-wireframes .tp-topic-score { display: grid; gap: 5px; }
+    #tp-wireframes .tp-topic-status { display: grid; gap: 3px; }
+    #tp-wireframes .tp-filterbar { display: flex; gap: 9px; flex-wrap: wrap; align-items: end; }
+    #tp-wireframes .tp-filterbar .tp-field { min-width: 150px; flex: 1; }
+    #tp-wireframes .tp-search {
+      min-height: 40px;
+      border: 1px solid var(--tp-line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--tp-surface-2);
+      color: var(--tp-text);
+    }
+    #tp-wireframes .tp-tagrow { display: flex; gap: 6px; flex-wrap: wrap; }
+    #tp-wireframes .tp-tag { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 8px; background: var(--tp-surface-3); color: var(--tp-accent-2); font-size: 12px; }
+    #tp-wireframes .tp-question {
+      display: grid;
+      grid-template-columns: 70px 110px 135px minmax(200px, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--tp-line);
+    }
+    #tp-wireframes .tp-question:last-child { border-bottom: 0; }
+    #tp-wireframes .tp-control-box { min-height: 40px; border: 1px solid var(--tp-strong-line); border-radius: 7px; background: var(--tp-surface-2); padding: 9px 10px; color: var(--tp-text); }
+    #tp-wireframes .tp-control-box.invalid { border: 2px solid var(--tp-danger); }
+    #tp-wireframes .tp-segmented { display: flex; gap: 6px; flex-wrap: wrap; }
+    #tp-wireframes .tp-segment { border: 1px solid var(--tp-line); border-radius: 7px; padding: 7px 10px; background: var(--tp-surface-2); color: var(--tp-muted); }
+    #tp-wireframes .tp-segment.active { background: var(--tp-accent); border-color: var(--tp-accent); color: #160d28; font-weight: 500; }
+    #tp-wireframes .tp-breadcrumbs { color: var(--tp-muted); font-size: 12px; }
+    #tp-wireframes .tp-form { display: grid; gap: 12px; }
+    #tp-wireframes .tp-input { min-height: 40px; border: 1px solid var(--tp-strong-line); border-radius: 7px; background: var(--tp-surface-2); }
+    #tp-wireframes .tp-input.invalid { border: 2px solid var(--tp-danger); }
+    #tp-wireframes .tp-formrow { display: grid; grid-template-columns: 1.5fr .7fr 1fr; gap: 10px; }
+    #tp-wireframes .tp-footer-actions { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    #tp-wireframes .tp-home { min-height: 664px; background: var(--tp-surface); }
+    #tp-wireframes .tp-homebar { min-height: 62px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 24px; border-bottom: 1px solid var(--tp-line); }
+    #tp-wireframes .tp-home-links { display: flex; gap: 18px; color: var(--tp-muted); }
+    #tp-wireframes .tp-hero { padding: 54px 7%; display: grid; grid-template-columns: 1.15fr .85fr; gap: 36px; align-items: center; }
+    #tp-wireframes .tp-hero-copy { display: grid; gap: 18px; }
+    #tp-wireframes .tp-hero h1 { font-size: 34px; line-height: 1.1; }
+    #tp-wireframes .tp-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    #tp-wireframes .tp-hero-visual { border: 1px solid var(--tp-strong-line); border-radius: 12px; padding: 18px; background: var(--tp-page); display: grid; gap: 12px; }
+    #tp-wireframes .tp-process { padding: 0 7% 42px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    #tp-wireframes .tp-step { border-top: 3px solid var(--tp-accent); padding-top: 10px; }
+    #tp-wireframes .tp-scoregrid { display: grid; grid-template-columns: 1.4fr repeat(4, .6fr); gap: 1px; background: var(--tp-line); border: 1px solid var(--tp-line); }
+    #tp-wireframes .tp-cell { min-height: 42px; display: flex; align-items: center; padding: 7px; background: var(--tp-surface); }
+    #tp-wireframes .tp-cell.head { background: var(--tp-surface-2); font-weight: 500; }
+    #tp-wireframes .tp-stategrid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    #tp-wireframes .tp-state { min-height: 170px; border: 1px dashed var(--tp-strong-line); border-radius: 9px; background: var(--tp-surface); padding: 18px; display: grid; align-content: center; gap: 10px; text-align: center; }
+    #tp-wireframes .tp-skeleton { display: grid; gap: 8px; }
+    #tp-wireframes .tp-skeleton .tp-line { animation: tp-pulse 1.6s ease-in-out infinite; }
+    @keyframes tp-pulse { 50% { opacity: .45; } }
+    @media (prefers-reduced-motion: reduce) { #tp-wireframes .tp-skeleton .tp-line { animation: none; } }
+    #tp-wireframes .tp-window.mobile .tp-shell { grid-template-columns: 1fr; }
+    #tp-wireframes .tp-window.mobile .tp-sidebar { display: none; }
+    #tp-wireframes .tp-window.mobile .tp-topbar { padding: 10px 14px; }
+    #tp-wireframes .tp-window.mobile .tp-mobile-menu { display: inline-flex; }
+    #tp-wireframes .tp-window.mobile .tp-content { padding: 16px 14px; }
+    #tp-wireframes .tp-window.mobile .tp-grid,
+    #tp-wireframes .tp-window.mobile .tp-grid.two,
+    #tp-wireframes .tp-window.mobile .tp-stategrid,
+    #tp-wireframes .tp-window.mobile .tp-process,
+    #tp-wireframes .tp-window.mobile .tp-hero { grid-template-columns: 1fr; }
+    #tp-wireframes .tp-window.mobile .tp-home-links { display: none; }
+    #tp-wireframes .tp-window.mobile .tp-homebar { padding: 10px 14px; }
+    #tp-wireframes .tp-window.mobile .tp-hero { padding: 28px 18px; }
+    #tp-wireframes .tp-window.mobile .tp-hero h1 { font-size: 28px; }
+    #tp-wireframes .tp-window.mobile .tp-process { padding: 0 18px 28px; }
+    #tp-wireframes .tp-window.mobile .tp-formrow { grid-template-columns: 1fr; }
+    #tp-wireframes .tp-window.mobile .tp-scoregrid { grid-template-columns: 1.3fr repeat(2, .7fr); }
+    #tp-wireframes .tp-window.mobile .tp-scoregrid .optional { display: none; }
+    #tp-wireframes .tp-window.mobile .tp-row { grid-template-columns: 1fr auto; }
+    #tp-wireframes .tp-window.mobile .tp-row > :nth-child(3) { display: none; }
+    #tp-wireframes .tp-window.mobile .tp-topic-row,
+    #tp-wireframes .tp-window.mobile .tp-question { grid-template-columns: 1fr; }
+    @media (max-width: 700px) {
+      #tp-wireframes { padding: 6px; }
+      #tp-wireframes .tp-window:not(.mobile) .tp-shell { grid-template-columns: 1fr; }
+      #tp-wireframes .tp-window:not(.mobile) .tp-sidebar { display: none; }
+      #tp-wireframes .tp-window:not(.mobile) .tp-mobile-menu { display: inline-flex; }
+      #tp-wireframes .tp-grid, #tp-wireframes .tp-grid.two, #tp-wireframes .tp-stategrid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <div class="tp-reviewbar" aria-label="Wireframe controls">
+    <div class="tp-field">
+      <label for="tp-screen">Wireframe</label>
+      <select id="tp-screen">
+        <option value="home">Public landing page</option>
+        <option value="dashboard" selected>Teacher dashboard</option>
+        <option value="class">Teacher class detail</option>
+        <option value="learner">Learner curriculum progress</option>
+        <option value="evidence">Learner topic detail</option>
+        <option value="assessment">Assessment builder — invalid state</option>
+        <option value="marking">Marking — partially complete</option>
+        <option value="student">Student progress</option>
+        <option value="states">Loading, empty, unavailable and forbidden</option>
+      </select>
+    </div>
+    <div class="tp-field">
+      <label for="tp-viewport">Viewport</label>
+      <select id="tp-viewport">
+        <option value="desktop" selected>Desktop</option>
+        <option value="mobile">Mobile</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="tp-window" id="tp-window">
+    <div class="tp-browser" aria-hidden="true">
+      <span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-url"></span>
+    </div>
+    <div id="tp-stage" aria-live="polite"></div>
+  </div>
+
+  <script>
+    (() => {
+      const root = document.getElementById('tp-wireframes');
+      const stage = root.querySelector('#tp-stage');
+      const screenSelect = root.querySelector('#tp-screen');
+      const viewportSelect = root.querySelector('#tp-viewport');
+      const productWindow = root.querySelector('#tp-window');
+
+      const nav = (active, role = 'Demo Teacher') => {
+        const items = role === 'Demo Student'
+          ? ['Dashboard', 'My assessments', 'My results', 'My progress']
+          : ['Dashboard', 'Classes', 'Curriculum', 'Assessments', 'Marking', 'Progress', 'Support review'];
+        const icons = {
+          'Dashboard': 'layout-dashboard',
+          'Classes': 'users',
+          'Curriculum': 'book-open',
+          'Assessments': 'clipboard-list',
+          'Marking': 'square-pen',
+          'Progress': 'chart-no-axes-column-increasing',
+          'Support review': 'scan-eye',
+          'My assessments': 'clipboard-list',
+          'My results': 'file-check-2',
+          'My progress': 'chart-no-axes-column-increasing'
+        };
+        return `<aside class="tp-sidebar">
+          <div class="tp-logo"><span class="tp-logo-mark"></span><span>TutorPulse</span></div>
+          <div class="tp-role">${role}</div>
+          <nav class="tp-nav" aria-label="${role} navigation">
+            ${items.map(label => `
+              <div class="tp-nav-item ${label === active ? 'active' : ''}"><i data-lucide="${icons[label]}" aria-hidden="true"></i>${label}</div>
+            `).join('')}
+          </nav>
+          <div class="tp-exit">Switch role · Exit demo</div>
+        </aside>`;
+      };
+
+      const topbar = (kicker, title) => `
+        <header class="tp-topbar">
+          <button class="tp-button ghost tp-mobile-menu" type="button" aria-label="Open navigation"><i data-lucide="menu" aria-hidden="true"></i></button>
+          <div class="tp-context"><span class="tp-kicker">${kicker}</span><span class="tp-title">${title}</span></div>
+          <span class="tp-pill">Fictional demo</span>
+        </header>`;
+
+      const shell = (active, kicker, title, body) => `
+        <div class="tp-shell">
+          ${nav(active)}
+          <main class="tp-main">${topbar(kicker, title)}<div class="tp-content">${body}</div></main>
+        </div>`;
+
+      const screens = {
+        home: () => `
+          <main class="tp-home">
+            <header class="tp-homebar">
+              <div class="tp-logo"><span class="tp-logo-mark"></span><span>TutorPulse</span></div>
+              <nav class="tp-home-links" aria-label="Public navigation"><span>How it works</span><span>Responsible use</span><span>Project evidence</span></nav>
+              <button class="tp-button" type="button">Explore demo</button>
+            </header>
+            <section class="tp-hero">
+              <div class="tp-hero-copy">
+                <span class="tp-pill">Synthetic portfolio demonstration</span>
+                <h1>Turn mathematics assessment evidence into clearer next steps.</h1>
+                <p>Explore how a fictional teacher can connect assessments, topic progress and human-reviewed support signals.</p>
+                <div class="tp-actions"><button class="tp-button primary" type="button">Explore teacher demo</button><button class="tp-button" type="button">Explore student demo</button></div>
+                <p class="tp-meta">No account needed · No real learner data · Free hosting may take a moment to wake</p>
+              </div>
+              <div class="tp-hero-visual" aria-label="Product preview placeholder">
+                <div class="tp-grid"><div class="tp-panel"><span class="tp-meta">Classes</span><strong class="tp-stat">2</strong></div><div class="tp-panel"><span class="tp-meta">To mark</span><strong class="tp-stat">1</strong></div><div class="tp-panel"><span class="tp-meta">Review</span><strong class="tp-stat">3</strong></div></div>
+                <div class="tp-panel"><h3>Topic evidence preview</h3><div class="tp-bars"><span class="tp-bar" style="height:42%"></span><span class="tp-bar" style="height:63%"></span><span class="tp-bar" style="height:58%"></span><span class="tp-bar" style="height:76%"></span><span class="tp-bar" style="height:71%"></span></div><span class="tp-meta">Labels and explanations accompany every visual</span></div>
+              </div>
+            </section>
+            <section class="tp-process"><div class="tp-step"><h3>1 · Record evidence</h3><p>Fictional assessments and topic-level marks.</p></div><div class="tp-step"><h3>2 · Understand progress</h3><p>Transparent summaries with result counts and context.</p></div><div class="tp-step"><h3>3 · Review support</h3><p>A teacher remains responsible for judgment.</p></div></section>
+          </main>`,
+        dashboard: () => shell('Dashboard','Year 10 Higher Mathematics','Teacher dashboard',`
+          <div class="tp-headingrow"><div><h1>Good afternoon, Demo Teacher</h1><p>Here is what needs attention in the fictional workspace.</p></div><button class="tp-button primary" type="button">Create assessment</button></div>
+          <div class="tp-grid"><div class="tp-panel"><span class="tp-meta">Classes</span><strong class="tp-stat">2</strong><span>View learners and progress</span></div><div class="tp-panel"><span class="tp-meta">Awaiting marks</span><strong class="tp-stat">1</strong><span>Autumn Algebra Check</span></div><div class="tp-panel"><span class="tp-meta">Teacher review</span><strong class="tp-stat">3</strong><span>Progress records need attention</span></div></div>
+          <div class="tp-grid two"><section class="tp-panel"><h2>Your classes</h2><div class="tp-list"><div class="tp-row"><strong>Year 10 Higher</strong><span>4 learners</span><span class="tp-pill">Current</span></div><div class="tp-row"><strong>Year 10 Foundation</strong><span>4 learners</span><span>View</span></div></div></section><section class="tp-panel"><h2>Continue marking</h2><strong>Autumn Algebra Check</strong><div class="tp-progress"><span style="width:50%"></span></div><span class="tp-meta">2 of 4 fictional learners marked</span><button class="tp-button" type="button">Continue marking</button></section></div>
+          <section class="tp-panel"><div class="tp-headingrow"><h2>Items for teacher review</h2><span class="tp-meta">Not automatic decisions</span></div><div class="tp-list"><div class="tp-row"><strong>Learner 001 · Algebra</strong><span>Mixed recent results</span><span>Open progress</span></div><div class="tp-row"><strong>Learner 003 · Geometry</strong><span>1 recorded result</span><span>Open progress</span></div></div></section>`),
+        class: () => shell('Classes','Classes / Year 10 Higher','Year 10 Higher',`
+          <div class="tp-breadcrumbs">Classes › Year 10 Higher</div>
+          <div class="tp-headingrow"><div><h1>Year 10 Higher</h1><p>4 fictional learners · Higher tier · 3 recent assessments</p></div><button class="tp-button primary" type="button">Create assessment</button></div>
+          <div class="tp-grid"><div class="tp-panel"><span class="tp-meta">Topics assessed</span><strong class="tp-stat">6 / tier total</strong><span>Higher-tier catalogue · exact total verified during curriculum mapping</span></div><div class="tp-panel"><span class="tp-meta">Learners with limited history</span><strong class="tp-stat">1</strong><span>Based on exact result counts</span></div><div class="tp-panel"><span class="tp-meta">Awaiting marks</span><strong class="tp-stat">1</strong><span>Assessment in progress</span></div></div>
+          <section class="tp-panel"><div class="tp-headingrow"><h2>Learners</h2><button class="tp-button" type="button">Filter learners</button></div><div class="tp-list"><div class="tp-row"><strong>Learner 001</strong><span>6 topics assessed</span><span class="tp-pill">Review 1</span></div><div class="tp-row"><strong>Learner 002</strong><span>6 topics assessed</span><span>View progress</span></div><div class="tp-row"><strong>Learner 003</strong><span>4 topics assessed</span><span class="tp-pill">1 result only</span></div><div class="tp-row"><strong>Learner 004</strong><span>6 topics assessed</span><span>View progress</span></div></div></section>
+          <div class="tp-note">No learner ranking is shown. Summaries describe evidence, not fixed ability.</div>`),
+        learner: () => shell('Progress','Classes / Year 10 Higher / Learner 001','Learner curriculum progress',`
+          <div class="tp-breadcrumbs">Classes › Year 10 Higher › Learner 001</div>
+          <div class="tp-headingrow"><div><h1>Learner 001</h1><p>Higher tier · progress across the Edexcel GCSE Mathematics curriculum</p></div><span class="tp-pill">Fictional learner</span></div>
+          <section class="tp-panel"><div class="tp-filterbar"><div class="tp-field"><label for="topic-search-demo">Search topics</label><div id="topic-search-demo" class="tp-search">Search by topic name…</div></div><div class="tp-field"><label>Show</label><div class="tp-control-box">All topics</div></div><div class="tp-field"><label>Order by</label><div class="tp-control-box">Lowest percentage first</div></div></div><div class="tp-tagrow"><span class="tp-tag">All</span><span class="tp-tag">Assessed</span><span class="tp-tag">Not yet assessed</span></div></section>
+          <section class="tp-panel"><div class="tp-headingrow"><div><h2>Higher-tier topics</h2><p class="tp-meta">Curriculum catalogue will use verified Pearson Edexcel specification points.</p></div><span class="tp-meta">Percentage · status · result history</span></div>
+            <div class="tp-topic-row"><div><strong>Indices, roots and surds</strong><div class="tp-meta">Number</div></div><div class="tp-topic-score"><strong>48%</strong><div class="tp-progress priority"><span style="width:48%"></span></div></div><div class="tp-topic-status"><strong>Priority support recommended</strong><span class="tp-meta">3 recorded results · latest 8 Oct</span></div><button class="tp-button" type="button">View topic</button></div>
+            <div class="tp-topic-row"><div><strong>Linear and quadratic equations</strong><div class="tp-meta">Algebra</div></div><div class="tp-topic-score"><strong>62%</strong><div class="tp-progress developing"><span style="width:62%"></span></div></div><div class="tp-topic-status"><strong>Developing — review recommended</strong><span class="tp-meta">4 recorded results · latest 6 Oct</span></div><button class="tp-button" type="button">View topic</button></div>
+            <div class="tp-topic-row"><div><strong>Trigonometry</strong><div class="tp-meta">Geometry and measures</div></div><div class="tp-topic-score"><strong>79%</strong><div class="tp-progress strong"><span style="width:79%"></span></div></div><div class="tp-topic-status"><strong>Strong</strong><span class="tp-meta">2 recorded results · latest 3 Oct</span></div><button class="tp-button" type="button">View topic</button></div>
+            <div class="tp-topic-row"><div><strong>Probability trees</strong><div class="tp-meta">Probability</div></div><div class="tp-topic-score"><strong>93%</strong><div class="tp-progress very-strong"><span style="width:93%"></span></div></div><div class="tp-topic-status"><strong>Very strong</strong><span class="tp-meta">3 recorded results · latest 29 Sep</span></div><button class="tp-button" type="button">View topic</button></div>
+            <div class="tp-topic-row"><div><strong>Circle theorems</strong><div class="tp-meta">Geometry and measures</div></div><div class="tp-topic-score"><strong>—</strong><div class="tp-progress unassessed"><span style="width:0%"></span></div></div><div class="tp-topic-status"><strong>Not yet assessed</strong><span class="tp-meta">No recorded results</span></div><button class="tp-button" type="button">View topic</button></div>
+          </section>
+          <div class="tp-note">Percentages summarise current assessment results. They do not define permanent ability. A percentage based on one result is labelled provisional.</div>`),
+        evidence: () => shell('Progress','Classes / Year 10 Higher / Learner 001','Topic detail',`
+          <div class="tp-breadcrumbs">Classes › Year 10 Higher › Learner 001 › Algebra</div>
+          <div class="tp-headingrow"><div><h1>Algebra</h1><p>Evidence for fictional Learner 001</p></div><span class="tp-pill">Human review required</span></div>
+          <div class="tp-grid"><div class="tp-panel"><span class="tp-meta">Current weighted percentage</span><strong class="tp-stat">62%</strong><span>Developing — review recommended</span></div><div class="tp-panel"><span class="tp-meta">Assessment history</span><strong class="tp-stat">4 results</strong><span>Latest completed 6 October</span></div><div class="tp-panel"><span class="tp-meta">Latest result</span><strong class="tp-stat">62%</strong><span>Up from previous result</span></div></div>
+          <div class="tp-grid two"><section class="tp-panel"><h2>Assessment evidence</h2><div class="tp-bars"><span class="tp-bar" style="height:38%"></span><span class="tp-bar" style="height:52%"></span><span class="tp-bar" style="height:48%"></span><span class="tp-bar" style="height:62%"></span></div><div class="tp-meta">42% · 55% · 51% · 62% — each point opens its source assessment</div></section><section class="tp-panel"><h2>Support signal</h2><strong class="tp-stat">41%</strong><span>Above the 38% model decision threshold</span><div class="tp-note warn">This signal supports teacher review. It does not diagnose the learner or create an intervention.</div><button class="tp-button" type="button">Read how this was calculated</button></section></div>
+          <section class="tp-panel"><h2>Teacher judgment</h2><p>Review assessment results, classroom context and existing support before recording a fictional next step.</p><div class="tp-footer-actions"><button class="tp-button" type="button">Return to all topics</button><button class="tp-button primary" type="button">Record fictional judgment</button></div></section>`),
+        assessment: () => shell('Assessments','Assessments / New','Create assessment',`
+          <div class="tp-breadcrumbs">Assessments › New assessment</div>
+          <div class="tp-headingrow"><div><h1>Assessment builder</h1><p>Draft · Changes not yet saved</p></div><span class="tp-pill">Step 2 of 3</span></div>
+          <section class="tp-panel"><h2>Assessment details</h2><div class="tp-form"><label><span class="tp-meta">Assessment title</span><div class="tp-control-box">Autumn Algebra Check</div></label><div class="tp-formrow"><label><span class="tp-meta">Tier</span><div class="tp-control-box">Higher</div></label><label><span class="tp-meta">Total marks</span><div class="tp-control-box">50</div></label><label><span class="tp-meta">Class</span><div class="tp-control-box">Year 10 Higher</div></label></div><div><span class="tp-meta">Assign to</span><div class="tp-segmented"><span class="tp-segment active">Entire class</span><span class="tp-segment">Selected learners</span></div></div><p class="tp-meta">Selecting “Selected learners” opens an optional learner checklist. Completion dates are recorded later when results are finalised.</p></div></section>
+          <section class="tp-panel"><div class="tp-headingrow"><div><h2>Question structure</h2><p class="tp-meta">Record marks, difficulty and curriculum topics — not the question wording.</p></div><strong>Total: 54 / 50 marks</strong></div>
+            <div class="tp-question"><strong>Q1</strong><div><span class="tp-meta">Max marks</span><div class="tp-control-box">5</div></div><div><span class="tp-meta">Difficulty</span><div class="tp-control-box">Easy</div></div><div><span class="tp-meta">Topics</span><div class="tp-control-box">Search Higher topics…</div><div class="tp-tagrow"><span class="tp-tag">Linear equations ×</span></div></div><button class="tp-button ghost" type="button">Remove</button></div>
+            <div class="tp-question"><strong>Q2</strong><div><span class="tp-meta">Max marks</span><div class="tp-control-box">8</div></div><div><span class="tp-meta">Difficulty</span><div class="tp-control-box">Medium</div></div><div><span class="tp-meta">Topics</span><div class="tp-control-box">Search Higher topics…</div><div class="tp-tagrow"><span class="tp-tag">Quadratic equations ×</span><span class="tp-tag">Graphs of functions ×</span></div></div><button class="tp-button ghost" type="button">Remove</button></div>
+            <div class="tp-question"><strong>Q3</strong><div><span class="tp-meta">Max marks</span><div class="tp-control-box invalid">41</div><span class="tp-meta" style="color:var(--tp-danger)">Question totals exceed 50.</span></div><div><span class="tp-meta">Difficulty</span><div class="tp-control-box">Hard</div></div><div><span class="tp-meta">Topics</span><div class="tp-control-box invalid">Search Higher topics…</div><span class="tp-meta" style="color:var(--tp-danger)">Choose at least one topic.</span></div><button class="tp-button ghost" type="button">Remove</button></div>
+            <button class="tp-button" type="button">Add question</button>
+          </section>
+          <div class="tp-note error" role="alert">Fix 2 problems before continuing: question marks must total exactly 50, and every question needs at least one topic.</div>
+          <div class="tp-footer-actions"><button class="tp-button" type="button">Save draft</button><button class="tp-button primary" type="button" disabled>Continue to preview</button></div>`),
+        marking: () => shell('Marking','Marking / Autumn Algebra Check','Mark assessment',`
+          <div class="tp-breadcrumbs">Marking › Autumn Algebra Check</div>
+          <div class="tp-headingrow"><div><h1>Autumn Algebra Check</h1><p>Year 10 Higher · Keyboard entry enabled</p></div><span class="tp-pill">2 of 4 learners complete</span></div>
+          <div class="tp-note">Use Tab to move forward, Shift + Tab to move back. Maximum marks remain visible beside every entry.</div>
+          <section class="tp-panel"><div class="tp-scoregrid"><div class="tp-cell head">Learner</div><div class="tp-cell head">Q1 / 5</div><div class="tp-cell head">Q2 / 8</div><div class="tp-cell head optional">Q3 / 7</div><div class="tp-cell head optional">State</div><div class="tp-cell">Learner 001</div><div class="tp-cell">4</div><div class="tp-cell">6</div><div class="tp-cell optional">5</div><div class="tp-cell optional">Complete</div><div class="tp-cell">Learner 002</div><div class="tp-cell">3</div><div class="tp-cell">7</div><div class="tp-cell optional">4</div><div class="tp-cell optional">Complete</div><div class="tp-cell">Learner 003</div><div class="tp-cell">2</div><div class="tp-cell" style="color:var(--tp-danger)">9</div><div class="tp-cell optional">—</div><div class="tp-cell optional">Invalid</div><div class="tp-cell">Learner 004</div><div class="tp-cell">—</div><div class="tp-cell">—</div><div class="tp-cell optional">—</div><div class="tp-cell optional">Not started</div></div></section>
+          <div class="tp-grid two"><div class="tp-note error" role="alert">Learner 003, Question 2: mark cannot exceed 8.</div><div class="tp-panel"><span class="tp-meta">Saved</span><strong>2 minutes ago</strong><span>One invalid field is not saved.</span></div></div>
+          <div class="tp-footer-actions"><button class="tp-button" type="button">Save progress</button><button class="tp-button primary" type="button" disabled>Review and finalise</button></div>`),
+        student: () => `
+          <div class="tp-shell">
+            ${nav('My progress','Demo Student')}
+            <main class="tp-main">${topbar('My progress','Demo Student')}<div class="tp-content">
+              <div class="tp-headingrow"><div><h1>My mathematics progress</h1><p>Your recent fictional assessment evidence, explained clearly.</p></div></div>
+              <div class="tp-grid"><div class="tp-panel"><span class="tp-meta">Strength</span><strong class="tp-stat">Number</strong><span>Consistent recent evidence</span></div><div class="tp-panel"><span class="tp-meta">Revisit</span><strong class="tp-stat">Algebra</strong><span>Recent evidence is improving</span></div><div class="tp-panel"><span class="tp-meta">Completed</span><strong class="tp-stat">3</strong><span>Fictional assessments</span></div></div>
+              <section class="tp-panel"><h2>Topics</h2><div class="tp-list"><div class="tp-row"><strong>Number</strong><span>Secure</span><span>6 pieces of evidence</span></div><div class="tp-row"><strong>Algebra</strong><span>Developing</span><span>4 pieces of evidence</span></div><div class="tp-row"><strong>Geometry</strong><span>Not enough evidence</span><span>1 result</span></div></div></section>
+              <section class="tp-panel"><h2>Your next step</h2><p>Revisit solving linear equations, then discuss your next practice task with your teacher.</p><div class="tp-note">Progress labels describe the available evidence. They do not define your ability.</div><button class="tp-button" type="button">View Algebra evidence</button></section>
+            </div></main>
+          </div>`,
+        states: () => shell('Dashboard','System experiences','Designed system states',`
+          <div class="tp-headingrow"><div><h1>Nothing important is left blank</h1><p>Each state explains what happened and what the visitor can do next.</p></div></div>
+          <div class="tp-stategrid"><section class="tp-state"><h2>Waking the demonstration</h2><div class="tp-skeleton"><div class="tp-line"></div><div class="tp-line medium"></div><div class="tp-line short"></div></div><p>The free service is starting. Product information remains available.</p><button class="tp-button" type="button">Retry now</button></section><section class="tp-state"><h2>No assessment evidence yet</h2><p>This fictional learner has no completed results for the selected topic.</p><button class="tp-button" type="button">Return to learner</button></section><section class="tp-state"><h2>Model temporarily unavailable</h2><p>Assessment evidence is still available. A support prediction cannot be shown right now.</p><button class="tp-button" type="button">View ordinary evidence</button></section><section class="tp-state"><h2>Teacher access required</h2><p>The Demo Student role cannot open this teacher page.</p><button class="tp-button" type="button">Return to student dashboard</button></section></div>`)
+      };
+
+      function render() {
+        productWindow.classList.toggle('mobile', viewportSelect.value === 'mobile');
+        stage.innerHTML = screens[screenSelect.value]();
+        if (window.lucide) window.lucide.createIcons({ attrs: { width: 16, height: 16 } });
+      }
+
+      screenSelect.addEventListener('change', render);
+      viewportSelect.addEventListener('change', render);
+      render();
+    })();
+  </script>
+</div>

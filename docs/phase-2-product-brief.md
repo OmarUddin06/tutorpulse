@@ -4,7 +4,7 @@
 
 - Stage: 9 - Define the Phase 2 product and user experience
 - GitHub issue: #18
-- Status: Approved Stage 9 foundation; remaining Stage 9 sections in progress
+- Status: Approved Stage 9 product and wireframe baseline; final checkpoint in progress
 - Baseline: TutorPulse V0.2.0
 - Data boundary: fictional and synthetic demonstration data only
 
@@ -105,7 +105,7 @@ These are fictional roles represented inside the product experience. They are no
 
 #### Fictional teacher
 
-The teacher needs to organise classes and learners, understand curriculum coverage, create and assign assessments, record marks, inspect topic-level progress and review support signals with their underlying evidence.
+The teacher needs to organise classes and learners, understand which verified tier topics have been assessed, create and assign assessments, record marks, inspect topic-level progress and review support signals with their underlying assessment results.
 
 #### Fictional student
 
@@ -139,14 +139,9 @@ Phase 2 will be successful when a first-time visitor can:
 
 ## Decisions still required during Stage 9
 
-- The exact minimum teacher journey for the first interactive release.
-- The exact minimum student journey for the first interactive release.
-- Whether the public demonstration uses role-selection, preconfigured fictional identities or both.
-- The page map, navigation structure and principal page hierarchy.
-- The visual design direction and reusable interface principles.
-- The low-fidelity layout of every principal page and important failure state.
-- Which V0.2.0 API resources can be reused unchanged and which later stages must extend.
-- The evidence required before Stage 9 can be marked complete.
+- Confirm the final documentation set is internally consistent.
+- Record the issue checklist and closing evidence before Stage 9 is marked complete.
+- Identify which V0.2.0 API resources can be reused unchanged and hand unresolved schema work to Stage 10.
 
 ## Approved journey decisions
 
@@ -157,6 +152,11 @@ The following Stage 9 decisions are approved and must guide the remaining requir
 3. The initial Demo Student experience presents assignments, results and progress but does not provide online assessment completion.
 4. Public demonstration interactions must not alter the permanent shared dataset. A temporary, isolated, resettable or client-side demonstration approach must be selected before public writes are implemented.
 5. A visitor enters the demonstration by selecting either the teacher or student role without creating an account.
+6. The default visual direction is dark purple with lighter-purple accents, accessible contrast and semantic progress colours.
+7. Learner detail first shows every verified tier-eligible curriculum topic; the teacher then opens a separate topic-detail page.
+8. Progress bands use the approved percentage boundaries and supportive labels recorded in `docs/phase-2-wireframe-decisions.md`.
+9. Primary interface wording shows exact result counts and limited-history explanations rather than an opaque evidence-confidence score.
+10. The assessment builder records question structure, maximum marks, difficulty and one-or-more tier-filtered topics without storing question wording.
 
 These decisions refine the plan recorded in the Phase 2 learning journey and memory checkpoint. They do not authorise application implementation during Stage 9.
 

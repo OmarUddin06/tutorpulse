@@ -76,25 +76,29 @@ Any new proposal must identify which approved journey it supports, its stage dep
 - A class list and class detail page.
 - A fictional learner list without competitive ranking.
 - Learner search or filtering appropriate to the small demonstration dataset.
-- A learner detail page connecting results, topics and recorded interventions.
+- A learner curriculum-progress page listing every verified topic eligible for that learner's tier.
+- Topic search, assessed/not-yet-assessed filters and percentage or alphabetical ordering.
+- A separate learner-topic detail page connecting results, assessment questions and recorded interventions.
 
 ### Curriculum representation
 
 - A verified initial GCSE mathematics curriculum structure for one selected exam-board specification.
 - Clear Foundation and Higher tier behaviour.
 - Curriculum areas, topics and teachable units organised consistently.
-- Topic coverage visible during class, learner and assessment workflows.
+- Topics assessed visible as X of the verified tier total during class, learner and assessment workflows.
 - The source and version of the curriculum recorded in documentation.
 
 ### Assessment creation and assignment
 
 - Assessment list with visible draft, published and assigned states.
 - A guided assessment-creation workflow.
-- Title, tier, questions, marks and curriculum-topic mappings.
-- Running total marks and clear validation.
+- Title, tier, class, declared total marks and recipient choice.
+- Numbered questions with maximum marks, Easy/Medium/Hard difficulty and one-or-more tier-filtered curriculum topics.
+- No question-text entry; TutorPulse records assessment structure rather than hosting the original question paper.
+- Running total marks and clear validation requiring the question total to equal the declared total exactly.
 - Preview before publication.
 - Assignment to a fictional class or selected fictional learners.
-- Explicit confirmation of recipients and due information.
+- Explicit confirmation of an entire class or selected fictional learners.
 
 ### Keyboard-friendly marking
 
@@ -108,9 +112,10 @@ Any new proposal must identify which approved journey it supports, its stage dep
 ### Teacher progress and judgment
 
 - Class and learner progress views.
-- Topic-level progress with labels as well as colour.
+- Topic-level progress with labels as well as colour: Very strong at 90-100%, Strong at 75 to below 90%, Developing - review recommended at 55 to below 75%, and Priority support recommended below 55%.
+- A neutral not-yet-assessed state and provisional wording when only one result contributes.
 - A transparent explanation of the evidence contributing to each summary.
-- Honest low-evidence or mixed-evidence states.
+- Exact result counts, latest-result dates and honest limited-history or mixed-result states rather than an unexplained confidence score.
 - A teacher-reviewed support signal that preserves the frozen V0.2.0 model contract.
 - Clear separation between model probability, decision threshold, academic support threshold and teacher judgment.
 - No automatic intervention or educational decision.
@@ -151,7 +156,7 @@ These may be included after the must-have journeys work reliably:
 
 These are polish rather than release requirements:
 
-- Theme selection, including a dark theme.
+- Optional theme selection beyond the approved dark-purple default.
 - Richer chart transitions.
 - Customisable dashboard-card ordering.
 - A presentation or guided-demo mode for interviews.

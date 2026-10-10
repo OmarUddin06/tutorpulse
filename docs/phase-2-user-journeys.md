@@ -163,13 +163,14 @@ Move from a class overview to the evidence behind one learner's topic-level prog
 1. The visitor enters the Demo Teacher experience.
 2. The teacher dashboard summarises fictional classes, recent assessments, unmarked work and items requiring review.
 3. The visitor opens a prepared mathematics class.
-4. The class page lists fictional learners and summarises recent evidence without ranking them.
+4. The class page lists fictional learners, topics assessed and exact limited-history information without ranking them.
 5. The visitor opens one learner profile.
-6. The learner page shows topic-level progress, recent assessments and recorded interventions.
-7. The visitor chooses one topic to inspect.
-8. A detail view explains which assessment results contributed to the displayed progress state.
-9. If a support-risk prediction is shown, the interface explains the probability, threshold, evidence limits and mandatory human review.
-10. The visitor may record a fictional teacher judgment or proposed next step only if the later demonstration architecture provides safe isolated or resettable writes.
+6. The learner page lists every verified curriculum topic eligible for the learner's Foundation or Higher tier.
+7. The visitor searches, filters or orders topics and sees a percentage, progress label, result count, latest-result date or not-yet-assessed state.
+8. The visitor chooses one topic to inspect.
+9. A detail view explains which assessment results and questions contributed to the displayed progress state.
+10. If a support-risk prediction is shown, the interface explains the probability, threshold, result-history limits and mandatory human review.
+11. The visitor may record a fictional teacher judgment or proposed next step only if the later demonstration architecture provides safe isolated or resettable writes.
 
 ### Successful journey
 
@@ -182,7 +183,7 @@ Move from a class overview to the evidence behind one learner's topic-level prog
 ### Important states
 
 - No assessment evidence for the selected topic.
-- Too little evidence for a confident progress summary.
+- One result or too little assessment history for a stable progress summary, with the exact reason shown.
 - Model unavailable while ordinary assessment information remains usable.
 - Forbidden information or action for the selected role.
 - Failed request with a safe retry action.
@@ -196,14 +197,15 @@ Create a valid fictional mathematics assessment and assign it to the intended cl
 ### Planned steps
 
 1. The teacher opens **Assessments** and chooses **Create assessment**.
-2. They enter a clear title and select the relevant mathematics tier.
-3. They add questions and allocate marks.
-4. Each question is mapped to one or more curriculum topics using an explicit rule defined in Stage 10.
-5. A running total displays the available marks.
-6. Validation identifies missing topics, invalid marks or incomplete questions before publication.
-7. The teacher previews the assessment summary.
-8. They publish the assessment and select a fictional class or learners.
-9. A confirmation view states exactly who received the assignment and when it is due.
+2. They enter a clear title, select the mathematics tier and class, and declare the assessment's total marks.
+3. They add numbered questions and enter each question's maximum marks without copying the question wording into TutorPulse.
+4. They select Easy, Medium or Hard difficulty for every question.
+5. Each question is mapped to one or more searchable curriculum topics eligible for the selected tier using allocation rules defined in Stage 10.
+6. A running total compares question marks with the declared assessment total.
+7. Validation identifies missing topics, difficulty, invalid marks or a total that does not match exactly.
+8. The teacher previews the assessment summary.
+9. They publish the assessment and assign it to the whole fictional class or selected fictional learners.
+10. A confirmation view states exactly who received the assignment.
 
 ### Successful journey
 
@@ -211,6 +213,7 @@ Create a valid fictional mathematics assessment and assign it to the intended cl
 - The selected tier and topics remain visible during creation.
 - Assignment recipients are explicit before confirmation.
 - The visitor can distinguish draft, published and assigned states.
+- No assessment-definition date is required, while later lifecycle events still preserve chronological dates.
 
 ### Important states
 
@@ -266,7 +269,7 @@ Understand recent fictional mathematics progress and identify one constructive n
 3. The visitor opens **My progress**.
 4. Topics are grouped clearly, with accessible labels in addition to colour.
 5. The visitor selects a topic.
-6. The topic page explains recent evidence, change over time and evidence confidence in plain language.
+6. The topic page explains recent results, change over time and the amount of supporting assessment history in plain language.
 7. The page presents a constructive next step, such as revisiting a topic or discussing it with the teacher.
 8. The visitor can return to the dashboard without entering teacher-only areas.
 
@@ -339,6 +342,11 @@ The following decisions were approved after reviewing the initial personas and j
 3. The initial Demo Student can view assignments, results and progress but does not complete assessments online.
 4. Public demonstration interactions must not modify the permanent shared dataset. The eventual implementation must use an isolated, resettable, temporary or client-side approach.
 5. Visitors select **Teacher demo** or **Student demo** from the landing page without creating an account.
+6. The learner journey includes a curriculum-wide progress page before the individual topic-detail page.
+7. The approved progress bands, colours and supportive labels are recorded in `docs/phase-2-wireframe-decisions.md`.
+8. Exact result counts and limited-history explanations replace an opaque evidence-confidence score.
+9. The assessment builder records question structure, maximum marks, difficulty and tier-filtered topic mappings without question wording.
+10. The default visual direction is dark purple with lighter-purple accents.
 
 These choices follow the Phase 2 learning journey and memory checkpoint. They are product requirements rather than completed functionality.
 
@@ -347,20 +355,17 @@ These choices follow the Phase 2 learning journey and memory checkpoint. They ar
 - Exact fictional class, teacher and student seed scenario.
 - Whether public demo mutations are session-local, reset periodically or simulated only in the browser.
 - Whether role selection opens the dashboard immediately or first presents a short optional guided-tour introduction.
-- Exact names and grouping of navigation items.
-- Which teacher journey should be the default two-minute demonstration.
-- How progress confidence and teacher judgment are expressed visually.
 - The exact content and layout of the read-only student assessment and result views.
+- Exact difficulty weights and the allocation rule for questions mapped to multiple topics.
 
 ## Next review questions
 
-During the remaining Stage 9 work, confirm:
+Before implementation, confirm or hand off:
 
-1. Which exact pages are required to support the approved journeys?
-2. Which capabilities belong in the MVP and which should be deferred?
-3. What visual structure best explains progress, confidence and teacher judgment?
-4. Which demonstration-data isolation strategy is proportionate for the portfolio release?
-5. Which states must appear in the low-fidelity wireframes before implementation begins?
+1. Which demonstration-data isolation strategy is proportionate for the portfolio release?
+2. Which exact Edexcel specification issue and tier mapping will Stage 10 adopt?
+3. How will question difficulty and multi-topic allocation contribute to progress calculations?
+4. Which optional guided-tour and student-result details remain appropriate after the must-have journeys work?
 
 ## Stage boundary
 
