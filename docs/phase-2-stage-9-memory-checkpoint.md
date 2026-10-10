@@ -9,6 +9,9 @@ This checkpoint allows a future working session to resume Phase 2 without recons
 - `docs/phase-2-mvp-scope.md`
 - `docs/phase-2-page-map.md`
 - `docs/phase-2-wireframe-decisions.md`
+- `docs/phase-2-frontend-backend-relationship.md`
+- `docs/phase-2-stage-9-learning-journey.md`
+- `docs/phase-2-stage-9-evidence.md`
 - `docs/wireframes/README.md`
 
 ## Repository state at this checkpoint
@@ -18,6 +21,7 @@ This checkpoint allows a future working session to resume Phase 2 without recons
 - Active Stage 9 issue branch: `18-define-phase-2-product-and-user-experience`
 - GitHub issue: #18
 - Existing public API deployment must remain operational while Phase 2 is developed separately.
+- Stage 9 status: requirements, journeys, scope, page map, wireframes, architecture handoff, evidence and reflection complete; pull-request review and merge remain.
 
 ## Phase 2 objective
 

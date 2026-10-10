@@ -4,7 +4,7 @@
 
 - Stage: 9 - Define the Phase 2 product and user experience
 - GitHub issue: #18
-- Status: Approved Stage 9 baseline
+- Status: Approved and audited Stage 9 baseline
 - Baseline: TutorPulse V0.2.0
 - Implementation status: Not started
 

@@ -4,7 +4,7 @@
 
 - Stage: 9 - Define the Phase 2 product and user experience
 - GitHub issue: #18
-- Status: Approved planning baseline; page map and wireframes still pending
+- Status: Approved and audited Stage 9 baseline
 - Baseline: TutorPulse V0.2.0
 - Implementation status: Not started
 
@@ -305,11 +305,11 @@ The journeys suggest the following initial navigation groups.
 
 - Dashboard
 - Classes
-- Learners
 - Curriculum
 - Assessments
 - Marking
 - Progress
+- Support review
 
 ### Demo Student navigation
 
@@ -318,7 +318,7 @@ The journeys suggest the following initial navigation groups.
 - My results
 - My progress
 
-These labels remain provisional until the Stage 9 page map and wireframes are reviewed.
+These labels match the approved Stage 9 page map and wireframes. Learners are reached through a class rather than a separate top-level navigation item.
 
 ## Cross-journey design rules
 

@@ -4,7 +4,7 @@
 
 - Stage: 9 - Define the Phase 2 product and user experience
 - GitHub issue: #18
-- Status: Approved Stage 9 product and wireframe baseline; final checkpoint in progress
+- Status: Approved and audited Stage 9 baseline
 - Baseline: TutorPulse V0.2.0
 - Data boundary: fictional and synthetic demonstration data only
 
@@ -137,11 +137,12 @@ Phase 2 will be successful when a first-time visitor can:
 - Claims of real-world model accuracy, fairness or educational benefit.
 - Native mobile applications.
 
-## Decisions still required during Stage 9
+## Stage 9 audit outcome
 
-- Confirm the final documentation set is internally consistent.
-- Record the issue checklist and closing evidence before Stage 9 is marked complete.
-- Identify which V0.2.0 API resources can be reused unchanged and hand unresolved schema work to Stage 10.
+- The final documentation set was reviewed for contradictions.
+- Stage 9 verification and reflection are recorded in `docs/phase-2-stage-9-evidence.md` and `docs/phase-2-stage-9-learning-journey.md`.
+- Existing API reuse and later extensions are recorded in `docs/phase-2-frontend-backend-relationship.md`.
+- Unresolved curriculum, schema, weighting and demonstration-write decisions are explicitly assigned to later stages.
 
 ## Approved journey decisions
 
